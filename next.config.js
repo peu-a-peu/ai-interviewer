@@ -9,9 +9,6 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  git: {
-    deploymentEnabled: false,
-  },
 };
 
 export default config;
