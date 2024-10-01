@@ -1,20 +1,15 @@
 import AiFactory from "../Factory/AiFactory";
-import openAIService from "../services/AiChatService";
-import { ChatCompletion } from "openai/resources/index.mjs";
-import OpenAI from "openai";
-import path from "path"
-import fs from "fs"
 import { ChatCompletionMessageParam } from "openai/src/resources/index.js";
 class InterviewController{
 
-    static async startInterview(){
+    // static async startInterview(){
 
-    }
+    // }
     static async getNextQuestion(prompt:string, messageContext:ChatCompletionMessageParam[]=[]){
-        const interviewId = 1
+        // const interviewId = 1
         // TODO : Fetch set of question answers from database based on interview ID
         const chatService = AiFactory.getChatService()
-        const audioService = AiFactory.getAudioService()
+        // const audioService = AiFactory.getAudioService()
 
         const aiResponse: string = await chatService.getAiResponse({
             messageContext,
@@ -32,9 +27,9 @@ class InterviewController{
         // }
     }
 
-    static async evaluateAnswers(){
+    // static async evaluateAnswers(){
 
-    }
+    // }
 
 
 }

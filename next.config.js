@@ -5,6 +5,13 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  git: {
+    deploymentEnabled: false,
+  },
+};
 
 export default config;

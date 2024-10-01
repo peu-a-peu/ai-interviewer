@@ -1,6 +1,6 @@
 "use client";
 import { FormEvent, useState } from "react";
-import { QAns, UIState } from "@/common/interfaces/TestUi.interface";
+import type { QAns, UIState } from "@/common/interfaces/TestUi.interface";
 import { api } from "@/trpc/react";
 import { SystemPrompt } from "../constants/prompts";
 const inputs = [
@@ -40,7 +40,7 @@ const initialState = {
 export default function TestUI() {
   const [state, setState] = useState<UIState>(initialState);
   const [pairs, setPairs] = useState<QAns[]>([])
-  const { status, data, error, refetch, isLoading } = api.test.checkResponse.useQuery({...state, pairs},{enabled:false});
+  const { data, error, refetch, isLoading } = api.test.checkResponse.useQuery({...state, pairs},{enabled:false});
   if(data){
     setPairs((pairs)=>[...pairs, {question:data,answer:""}])
   }
@@ -62,7 +62,7 @@ export default function TestUI() {
   }
 
   function handlePairChange(id:number,key:keyof QAns,val:string){
-    let local = [...pairs]
+    const local = [...pairs]
     if(local[id]){
       local[id][key] = val
     }
@@ -78,7 +78,7 @@ export default function TestUI() {
         {inputs.map(({ label, name }) => (
           <>
             <label className="font-semibold text-gray-600">{label}</label>
-            <input onChange={(e)=>handleChange(name,e.target.value)} className="rounded-md border-2 p-2 text-blue-800" name={name} value={state[name as keyof UIState] as string} type="text" required />
+            <input onChange={(e)=>handleChange(name,e.target.value)} className="rounded-md border-2 p-2 text-blue-800" name={name} value={state[name as keyof UIState]} type="text" required />
           </>
         ))}
 

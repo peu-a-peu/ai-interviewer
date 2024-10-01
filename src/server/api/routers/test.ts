@@ -28,7 +28,7 @@ export const testRouter = createTRPCRouter({
       let {prompt,needAudio,pairs=[], ...rest} = input;
       prompt+=`/n you have to use this object to get values of the variables and then you have to ask questions accordingly. ${JSON.stringify(rest)}`
       const context = []
-      for(let pair of pairs){
+      for(const pair of pairs){
         context.push({
           role:"assistant" as OpenAIMessageRole, content:pair.question,
         },{
