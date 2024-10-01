@@ -1,5 +1,5 @@
 import AiFactory from "../Factory/AiFactory";
-import { ChatCompletionMessageParam } from "openai/src/resources/index.js";
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 class InterviewController{
 
     // static async startInterview(){
