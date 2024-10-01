@@ -14,7 +14,7 @@ class InterviewController{
         const aiResponse: string = await chatService.getAiResponse({
             messageContext,
             prompt,
-            role:"user"
+            role:"system"
         })
 
         return aiResponse;

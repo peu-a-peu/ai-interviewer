@@ -26,7 +26,7 @@ export const testRouter = createTRPCRouter({
     }))
     .query(async({ input }) => {
       let {prompt,needAudio,pairs=[], ...rest} = input;
-      prompt+=`/n you have to use this object to get values of the variables and then you have to ask questions accordingly. ${JSON.stringify(rest)}`
+      prompt+=`/n you have to use this object and interprete its keys in your conversation accordingly. ${JSON.stringify(rest)}`
       const context = []
       for(const pair of pairs){
         context.push({

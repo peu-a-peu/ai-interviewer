@@ -2,6 +2,7 @@ import { env } from "@/env";
 import { GetOpenAiResponseParam } from "../../../interfaces/OpenAiInterface"
 import OpenAiConnection from "../../connections/OpenAI/OpenAiConnection";
 import { ChatService } from "../AiChatService";
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 class OpenAiChatService implements ChatService{
     instance:OpenAiConnection
     constructor(){
@@ -10,11 +11,10 @@ class OpenAiChatService implements ChatService{
 
     getAiResponse = async(param:GetOpenAiResponseParam)=>{
         const {role, prompt, messageContext} = param;
-        let messages = [...messageContext, {
+        let messages = [{
             role,
             content: prompt,
-            name:""+Date.now()
-        }]
+        },...messageContext] as ChatCompletionMessageParam[]
       
         const res = await  this.instance.client.chat.completions.create({
             model: env.OPENAI_CHAT_MODEL!,
