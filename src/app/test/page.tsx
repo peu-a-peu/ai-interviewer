@@ -37,15 +37,6 @@ const initialState = {
 };
 
 
-function Resume(){
-  const [resume,setResume]= useState('')
-  const { data, error, refetch, isLoading } = api.interview.summariseResume.useMutation({text: resume},{enabled:false});
-  return <>
-  <textarea value={resume} onChange={(e)=>setResume(e.target.value)}></textarea>
-      <button onClick={async()=>await refetch()}>Summarise resume</button>
-      <p>Summary: {data||""}</p>
-  </>
-}
 export default function TestUI() {
   const [state, setState] = useState<UIState>(initialState);
   const [pairs, setPairs] = useState<QAns[]>([])
@@ -84,7 +75,6 @@ export default function TestUI() {
   return (
     <div>
       <h1 className="text-2xl">Test AI Response</h1>
-      <Resume/>
       <form className="grid grid-cols-2 gap-2" onSubmit={handleSubmit}>
         <label>System prompt</label>
         <textarea className="rounded-md border-2 p-2 col-span-2 text-blue-800" value={state.prompt} onChange={(e)=>handleChange("prompt",e.target.value)}/>

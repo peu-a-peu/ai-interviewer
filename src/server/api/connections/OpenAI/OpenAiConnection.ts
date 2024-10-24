@@ -19,13 +19,6 @@ class OpenAiConnection{
         return OpenAiConnection.instance
     }
 
-    text2Speech = async(response:string)=>{
-        return this.client.audio.speech.create({
-            input: response,
-            model: env.OPENAI_VOICE_MODEL,
-            voice:"alloy"
-        })
-    }
 }
 
 export default OpenAiConnection;
