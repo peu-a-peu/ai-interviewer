@@ -101,6 +101,26 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   return result;
 });
 
+const globalErrorHandler = t.middleware(async ({ next, path }) => {
+  try {
+    // Proceed with the request
+    return await next();
+  } catch (error) {
+    // If it's already a TRPCError, just throw it
+    if (error instanceof TRPCError) {
+      throw error;
+    }
+
+    // If it's not a TRPCError, log it and throw a 500 TRPCError
+    console.error(`Unexpected error in ${path}:`, error);
+
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR', // This will result in a 500 status code
+      message: 'Something went wrong. Please try again later.',
+    });
+  }
+});
+
 /**
  * Public (unauthenticated) procedure
  *
@@ -108,7 +128,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure.use(timingMiddleware).use(globalErrorHandler);
 
 /**
  * Protected (authenticated) procedure
@@ -120,6 +140,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
+  .use(globalErrorHandler)
   .use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });

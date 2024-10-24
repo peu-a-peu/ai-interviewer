@@ -1,3 +1,116 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    @apply bg-white;
+}
+
+/* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 8px;
+    /* Width of the scrollbar */
+    height: 8px;
+    /* Height of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Color of the track (the background area) */
+    border-radius: 10px;
+    /* Optional: Rounded corners */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    /* Color of the scroll thumb (the draggable part) */
+    border-radius: 10px;
+    /* Optional: Rounded corners */
+}
+
+.dot {
+    animation: growNshrink ease-in-out 1s infinite;
+    animation-delay: calc((var(--i) * 100ms));
+}
+
+
+@keyframes growNshrink {
+
+    0%,
+    100% {
+        transform: scaleY(1);
+        border-radius: 100%;
+    }
+
+    50% {
+        transform: scaleY(1.7);
+        border-radius: 50%;
+    }
+}
+
+.assistant-speak {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.85;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Hide the default number input arrows in WebKit browsers (Chrome, Safari) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Remove the arrows */
+    margin: 0; /* Reset margin */
+}
+
+/* Hide the default number input arrows in Firefox */
+input[type="number"] {
+    -moz-appearance: textfield; /* Change the appearance */
+}
+
+
+.loader{
+    animation : rotate linear 1s infinite;
+}
+
+@keyframes rotate {
+    100%{
+        transform: rotate(360deg);
+    }
+}
+
+.mic-disabled{
+    background-color: red;
+    position: relative;
+    border-radius: 100%;
+    overflow: hidden;
+}
+
+.mic-disabled::before{
+content:"";
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%) rotate(45deg);
+width:4px;
+height:100%;
+background-color: #ec1f5d;
+}

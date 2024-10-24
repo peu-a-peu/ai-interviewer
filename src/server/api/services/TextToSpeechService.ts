@@ -1,5 +1,5 @@
 export interface AudioService {
-    convertTextToAudio(text:string):Promise<Response>
+    convertTextToAudio(text:string):Promise<Blob>
 }
 
 class TextToSpeechService{

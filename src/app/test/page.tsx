@@ -1,5 +1,5 @@
-"use client";
-import { FormEvent, useState } from "react";
+'use client';
+import { FormEvent, useEffect, useState } from "react";
 import type { QAns, UIState } from "@/common/interfaces/TestUi.interface";
 import { api } from "@/trpc/react";
 import { SystemPrompt } from "../constants/prompts";
@@ -37,13 +37,26 @@ const initialState = {
 };
 
 
+function Resume(){
+  const [resume,setResume]= useState('')
+  const { data, error, refetch, isLoading } = api.interview.summariseResume.useMutation({text: resume},{enabled:false});
+  return <>
+  <textarea value={resume} onChange={(e)=>setResume(e.target.value)}></textarea>
+      <button onClick={async()=>await refetch()}>Summarise resume</button>
+      <p>Summary: {data||""}</p>
+  </>
+}
 export default function TestUI() {
   const [state, setState] = useState<UIState>(initialState);
   const [pairs, setPairs] = useState<QAns[]>([])
   const { data, error, refetch, isLoading } = api.test.checkResponse.useQuery({...state, pairs},{enabled:false});
+
+ useEffect(()=>{
   if(data){
     setPairs((pairs)=>[...pairs, {question:data,answer:""}])
   }
+},[data])
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     await refetch();
@@ -71,6 +84,7 @@ export default function TestUI() {
   return (
     <div>
       <h1 className="text-2xl">Test AI Response</h1>
+      <Resume/>
       <form className="grid grid-cols-2 gap-2" onSubmit={handleSubmit}>
         <label>System prompt</label>
         <textarea className="rounded-md border-2 p-2 col-span-2 text-blue-800" value={state.prompt} onChange={(e)=>handleChange("prompt",e.target.value)}/>

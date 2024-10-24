@@ -11,7 +11,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const outputFilePath = path.join(__dirname, 'finetune.jsonl');
 const companyId = '01J9JMH0X49GV2WPTDNFA234GM'
-console.log({env})
 
   async function execute(){
     const jsonlLines:any[] = [];
@@ -21,11 +20,11 @@ console.log({env})
     }).from(company).where(sql`company_id=${companyId}`))[0]
 
     let obj:Record<string,string[]> = {}
-    records.forEach(({question,experience_level,postion,interview_type})=>{
-        if(!postion){
+    records.forEach(({question,experience_level,position,interview_type})=>{
+        if(!position){
             return;
         }
-        const key = `${postion?.trim()}%${interview_type?.trim()}%${experience_level?.trim()}`
+        const key = `${position?.trim()}%${interview_type?.trim()}%${experience_level?.trim()}`
         if(obj[key]){
             obj[key].push(question)
         }else{
