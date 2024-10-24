@@ -107,3 +107,5 @@ import { question } from "./question";
 // );
 export { company } from './company';
 export { question } from './question';
+export { interview } from './interview';
+export { conversation } from './conversation';

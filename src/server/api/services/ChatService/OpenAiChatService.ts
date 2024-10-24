@@ -10,7 +10,7 @@ class OpenAiChatService implements ChatService{
     }
 
     getAiResponse = async(param:GetOpenAiResponseParam)=>{
-        const {role, prompt, messageContext} = param;
+        const {role, prompt, messageContext=[]} = param;
         let messages = [{
             role,
             content: prompt,

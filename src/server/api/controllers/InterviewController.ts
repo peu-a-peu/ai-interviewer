@@ -1,35 +1,134 @@
 import AiFactory from "../Factory/AiFactory";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-class InterviewController{
+import InterviewService from "../services/InterviewService";
+import { NewInterview } from "@/server/interfaces/drizzle";
+import QuestionsService from "../services/QuestionsService";
+import CustomError from "@/app/components/utils/CustomError";
+import { evaluationPrompt, getSystemPrompt } from "@/server/libs/system-prompt";
+import { SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
 
-    // static async startInterview(){
+class InterviewController {
+    static chatService = AiFactory.getChatService()
+    static audioService = AiFactory.getAudioService()
+    static async createInterview(data: NewInterview) {
+        return await InterviewService.createInterview(data)
+    }
 
-    // }
-    static async getNextQuestion(prompt:string, messageContext:ChatCompletionMessageParam[]=[]){
-        // const interviewId = 1
-        // TODO : Fetch set of question answers from database based on interview ID
-        const chatService = AiFactory.getChatService()
-        // const audioService = AiFactory.getAudioService()
+    static async getNextQuestion(interviewId: string, audio?: Blob) {
 
-        const aiResponse: string = await chatService.getAiResponse({
+        const currentInterview = await InterviewService.getInterviewById(interviewId)
+        if (!currentInterview || currentInterview.ended_at) {
+            throw new CustomError("Interview not found", 404)
+        }
+        const [conversations, questions] = await Promise.all([
+            InterviewService.getInterviewConversations(interviewId),
+            QuestionsService.getQuestionsForCompany(currentInterview)
+        ])
+
+        const { experience, interview_type, resume_summary, position,created_at } = currentInterview
+        const prompt = getSystemPrompt({
+            experience,
+            interview_type,
+            resume_summary,
+            position,
+            questions,
+            created_at
+        } as SystemPromptInput)
+
+        let lastAns = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
+        if (audio) {
+            const data = await this.audioService.convertAudioToText(audio)
+            lastAns = data.text
+        }
+        const messageContext: ChatCompletionMessageParam[] = []
+        conversations.forEach(({ question, answer, conversation_id }, index) => {
+            messageContext.push({
+                role: "assistant",
+                content: question
+            }, {
+                role: "user",
+                content: conversation_id === lastConversationId ? lastAns : (answer || "")
+            })
+        });
+
+
+        console.log(prompt)
+        console.log(messageContext)
+        let aiResponse: string = await this.chatService.getAiResponse({
             messageContext,
             prompt,
-            role:"system"
+            role: "system"
+        })
+
+        const isOver = aiResponse.includes("%EXIT%")
+        if (isOver) {
+            aiResponse = aiResponse.replace('%EXIT%', '')
+            await InterviewService.closeInterview(interviewId)
+        }
+
+        await Promise.all([
+            InterviewService.addConversation(interviewId, aiResponse),
+            lastConversationId && InterviewService.updateConversation(lastConversationId, lastAns)
+        ])
+
+        let mp3;
+        if (aiResponse) {
+            mp3 = await this.audioService.convertTextToAudio(aiResponse)
+        }
+        return { mp3, isOver }
+    }
+
+    static async summarizeResume(resumeContent: string) {
+        const prompt = `Extract the candidate's name, total years of experience, industries or domains worked in, and tools and technologies used from the following resume text. Present this information in a single, coherent paragraph of no more than 300 words, ensuring to exclude irrelevant details."
+Resume text: ${resumeContent}`
+
+        const aiResponse: string = await this.chatService.getAiResponse({
+            prompt,
+            role: "system"
         })
 
         return aiResponse;
-        // const speechFile = path.resolve("./speech2.mp3");
-  
-        // if (aiResponse) {
-        //   const mp3 = await audioService.convertTextToAudio(aiResponse)
-        //   const buffer = Buffer.from(await mp3.arrayBuffer());
-        //   await fs.promises.writeFile(speechFile, buffer);
-        // }
     }
 
-    // static async evaluateAnswers(){
 
-    // }
+    static async closeInterview(interviewId: string) {
+        return await InterviewService.closeInterview(interviewId)
+    }
+
+    static async evaluateAnswers(interviewId: string) {
+        const currentInterview = await InterviewService.getInterviewById(interviewId)
+        if (!currentInterview) {
+            throw new CustomError("Interview not found", 404)
+        }
+        const { experience, interview_type, resume_summary, position, } = currentInterview
+        const conversations = await InterviewService.getInterviewConversations(interviewId)
+        const messageContext: ChatCompletionMessageParam[] = []
+        conversations.forEach(({ question, answer }, index) => {
+            messageContext.push({
+                role: "assistant",
+                content: question
+            }, {
+                role: "user",
+                content: answer || ""
+            })
+        });
+
+        const aiResponse: string = await this.chatService.getAiResponse({
+            prompt: evaluationPrompt({
+                experience,
+                interview_type,
+                resume_summary,
+                position,
+            } as SystemPromptInput),
+            role: "system",
+            messageContext
+
+        })
+
+        return aiResponse;
+
+
+    }
 
 
 }

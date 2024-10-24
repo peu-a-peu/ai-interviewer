@@ -8,7 +8,9 @@ import {
 import InterviewController from "../controllers/InterviewController";
 import { OpenAIMessageRole } from "@/server/interfaces/OpenAiInterface";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import AiFactory from "../Factory/AiFactory";
 
+const chatService = AiFactory.getChatService()
 export const testRouter = createTRPCRouter({
   checkResponse: publicProcedure
     .input(z.object({ 
@@ -27,7 +29,7 @@ export const testRouter = createTRPCRouter({
     .query(async({ input }) => {
       let {prompt,needAudio,pairs=[], ...rest} = input;
       prompt+=`/n you have to use this object and interprete its keys in your conversation accordingly. ${JSON.stringify(rest)}`
-      const context = []
+      const context = [] 
       for(const pair of pairs){
         context.push({
           role:"assistant" as OpenAIMessageRole, content:pair.question,
@@ -35,7 +37,14 @@ export const testRouter = createTRPCRouter({
           role:"user" as OpenAIMessageRole, content:pair.answer,
         })
       }
-      return await InterviewController.getNextQuestion(prompt,context as ChatCompletionMessageParam[])
+        const aiResponse: string = await chatService.getAiResponse({
+        messageContext: context as ChatCompletionMessageParam[],
+        prompt,
+        role: "system"
+    })
+
+    return aiResponse
+
     }),
 
 });

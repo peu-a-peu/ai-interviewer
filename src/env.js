@@ -12,7 +12,9 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     OPENAI_API_KEY: z.string(),
     OPENAI_CHAT_MODEL:z.string(),
-    OPENAI_VOICE_MODEL: z.string(),
+    OPENAI_TTS_MODEL: z.string(),
+    OPENAI_STT_MODEL: z.string(),
+    AI_LANGUAGE: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -53,7 +55,9 @@ export const env = createEnv({
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
     OPENAI_API_KEY:process.env.OPENAI_API_KEY,
     OPENAI_CHAT_MODEL: process.env.OPENAI_CHAT_MODEL,
-    OPENAI_VOICE_MODEL: process.env.OPENAI_VOICE_MODEL
+    OPENAI_TTS_MODEL: process.env.OPENAI_TTS_MODEL,
+    OPENAI_STT_MODEL: process.env.OPENAI_STT_MODEL,
+    AI_LANGUAGE: process.env.AI_LANGUAGE
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
