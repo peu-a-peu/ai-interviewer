@@ -10,7 +10,9 @@ import { z } from "zod";
 import clsx from "clsx";
 import Select from "../ui/Select";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 const interviewTypes = ['인성면접', 'PT면접', '토론면접', '일반면접', '임원면접']
+
 
 
 const formSchema = z.object({
@@ -30,9 +32,10 @@ const initialState: FormData = {
     experience: 0,
     interview_type: '',
     resume_summary: '',
-    position:''
+    position: ''
 }
 export default function StartInterviewForm() {
+    const t = useTranslations()
     const apiUtil = api.useUtils()
     const router = useRouter()
     const [selected, setSelected] = useState<Option>()
@@ -41,6 +44,15 @@ export default function StartInterviewForm() {
     const [options, setOptions] = useState<Option[]>([])
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState<File>()
+
+    const interviewTypesText = [
+        t("Personality Interview"),
+        t("Presentation Interview"),
+        t("Discussion Interview"),
+        t("General Interview"),
+        t("Executive Interview")
+    ]
+
 
     async function handleSearch(query: string): Promise<Option[]> {
         try {
@@ -80,7 +92,7 @@ export default function StartInterviewForm() {
             router.push(`/interview/${data}`)
         } catch (err) {
             console.log(err)
-        } finally{
+        } finally {
             setLoading(false)
         }
     }
@@ -90,7 +102,7 @@ export default function StartInterviewForm() {
         if (data) {
             setLoading(true)
             const summary = await extractText()
-            handleChange('resume_summary',summary)
+            handleChange('resume_summary', summary)
             data.resume_summary = summary || ""
             createInterview(data)
         }
@@ -110,13 +122,13 @@ export default function StartInterviewForm() {
         }
     }
 
-    function selectFile(e:any){
+    function selectFile(e: any) {
         const file = e.target.files?.[0]
         setFile(file)
     }
 
     const extractText = async () => {
-        if(!file){
+        if (!file) {
             return ""
         }
         const fd = new FormData()
@@ -135,37 +147,37 @@ export default function StartInterviewForm() {
         selected && getCompanyRoles(selected.value)
     }, [selected])
 
-    return <form className="flex flex-col gap-7" onSubmit={loading ? ()=>{} : handleSubmit}>
+    return <form className="flex flex-col gap-7" onSubmit={loading ? () => { } : handleSubmit}>
         <div>
-            <Label error={formErrors?.company_id}>1. 회사를 선택하세요</Label>
+            <Label error={formErrors?.company_id}>1. {t(`Select a company`)}</Label>
             <SearchWithSelect
-                placeholder="여기에 회사 이름을 입력하세요."
+                placeholder={t("Please enter the company name here")}
                 selected={selected}
                 onSearch={handleSearch}
                 onOptionClick={(option) => { setSelected(option); handleChange('company_id', option.value) }}
             />
         </div>
         <div>
-            <Label error={formErrors?.experience}>2. 연차를 선택하세요</Label>
+            <Label error={formErrors?.experience}>2. {t(`Select years of experience`)}</Label>
             <Input onChange={(e) => handleChange('experience', parseInt(e.target.value))} type="number" classes="w-16" placeholder="12" />
         </div>
         <div>
-            <Label error={formErrors?.interview_type}>3. 면접 유형을 선택하세요</Label>
+            <Label error={formErrors?.interview_type}>3. {t(`Select interview type`)}</Label>
             <div className="flex gap-2.5 flex-wrap">
-                {interviewTypes.map((item, index) => <Chip extraClass={clsx('cursor-pointer', formData.interview_type === item ? "bg-purple text-white" : "")} onClick={() => handleChange('interview_type', item)} key={index}>{item}</Chip>)}
+                {interviewTypes.map((item, index) => <Chip extraClass={clsx('cursor-pointer', formData.interview_type === item ? "bg-purple text-white" : "")} onClick={() => handleChange('interview_type', item)} key={index}>{interviewTypesText[index]}</Chip>)}
             </div>
         </div>
         <div>
-            <Label>4. 직군을 선택해주세요</Label>
-            <Select disabled={!formData.company_id} options={options} onOptionClick={(option) => { handleChange('position',option.value)}} />
+            <Label>4. {t(`Please select a job category`)}</Label>
+            <Select disabled={!formData.company_id} options={options} onOptionClick={(option) => { handleChange('position', option.value) }} />
         </div>
         <div>
-            <Label error={formErrors?.resume_summary}>5. 이력서 기반의 면접을 원하시면 업로드 해주세요  <span className="text-gray-400 text-sm">(선택 사항)</span></Label>
-            <label className="cursor-pointer text-nowrap inline-block w-fit border text-sm md:text-md border-black rounded-2xl font-medium text-black p-2.5" htmlFor="fileUpload">이력서 업로드</label>
+            <Label error={formErrors?.resume_summary}>5. {t(`If you want to have a resume-based interview, please upload it`)}  <span className="text-gray-400 text-sm">({t(`Optional`)})</span></Label>
+            <label className="cursor-pointer text-nowrap inline-block w-fit border text-sm md:text-md border-black rounded-2xl font-medium text-black p-2.5" htmlFor="fileUpload">{t(`Resume upload`)}</label>
             <input onChange={selectFile} type="file" className="hidden" id="fileUpload" accept="application/pdf" />
             <span className="text-sm text-purple ml-2">{file?.name}</span>
         </div>
-        <Button isLoading={loading} overrideClasses="rounded-2xl md:rounded-3xl text-md md:text-2xl font-semibold py-4 px-12 md:px-14 md:py-5">무료로 모의면접 1회 경험하기</Button>
+        <Button isLoading={loading} overrideClasses="rounded-2xl md:rounded-3xl text-md md:text-2xl font-semibold py-4 px-12 md:px-14 md:py-5">{t(`Experience a mock interview for free once`)}</Button>
 
 
     </form>
