@@ -12,7 +12,8 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "job": "tsx  src/server/jobs/job.ts"
+    "job": "tsx  src/server/jobs/job.ts",
+    "extract": "i18next 'src/app/**/*.{js,jsx,ts,tsx}'"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.1.0",
@@ -32,6 +33,7 @@
     "hark": "^1.2.3",
     "next": "^14.2.15",
     "next-auth": "^4.24.7",
+    "next-intl": "^3.23.5",
     "openai": "^4.64.0",
     "pdf-parse": "^1.1.1",
     "postgres": "^3.4.4",
@@ -53,6 +55,7 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.4",
     "eslint-plugin-drizzle": "^0.2.3",
+    "i18next-parser": "^9.0.2",
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",

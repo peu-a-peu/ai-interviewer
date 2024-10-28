@@ -2,8 +2,9 @@ import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-
+import { NextIntlClientProvider } from 'next-intl';
 import { TRPCReactProvider } from "@/trpc/react";
+import { getLocale, getMessages } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -11,13 +12,18 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
+  console.log({locale})
+  const messages = await getMessages();
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang={locale} className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <NextIntlClientProvider messages={messages}>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
