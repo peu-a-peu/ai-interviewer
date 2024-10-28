@@ -1,0 +1,22 @@
+{
+  "Personality Interview": "인성 면접",
+  "Presentation Interview": "PT 면접",
+  "Discussion Interview": "토론 면접",
+  "General Interview": "일반 면접",
+  "Executive Interview": "임원 면접",
+  "Select a company": "회사를 선택하세요",
+  "Please enter the company name here": "여기에 회사 이름을 입력하세요.",
+  "Select years of experience": "연차를 선택하세요",
+  "Select interview type": "면접 유형을 선택하세요",
+  "Please select a job category": "직군을 선택해주세요",
+  "If you want to have a resume-based interview, please upload it": "이력서 기반의 면접을 원하시면 업로드 해주세요.",
+  "Optional": "선택 사항",
+  "Resume upload": "이력서 업로드",
+  "Experience a mock interview for free once": "무료로 모의면접 1회 경험하기",
+  "Interview Summary": "면접 요약",
+  "Would you like to stop the interview?": "면접을 중단하시겠어요?",
+  "Yes": "네",
+  "No": "아니오",
+  "Close": "닫기",
+  "Practice with an AI interviewer trained on 40,000 real exam questions to increase your chances of passing!": "4만개의 실제 기출 질문을 학습한 AI 면접관과 모의면접 하고 합격 확률을 높여보세요!"
+}
