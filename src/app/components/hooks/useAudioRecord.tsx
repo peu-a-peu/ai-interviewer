@@ -1,5 +1,7 @@
+'use client'
 import { useEffect, useState, useRef } from "react";
-import hark from "hark"; 
+import hark from "hark";
+import { FFmpeg } from '@ffmpeg/ffmpeg';
 
 export const useRecordVoice = () => {
     const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -10,6 +12,30 @@ export const useRecordVoice = () => {
     const [recordingStatus, setRecordingStatus] = useState<"recording" | "paused" | "inactive">("inactive");
     const harkEventsRef = useRef<hark.Harker | null>(null);
     const harkStoppedRef = useRef<boolean>(false)
+
+
+    async function convertBlobToOpus(webmBlob: Blob) {
+        const ffmpeg = new FFmpeg();
+        await ffmpeg.load();
+
+        // Step 2: Read the Blob into an ArrayBuffer
+        const arrayBuffer = await webmBlob.arrayBuffer();
+
+        // Step 3: Write the ArrayBuffer to FFmpeg's in-memory filesystem
+        await ffmpeg.writeFile('input.webm', new Uint8Array(arrayBuffer));
+
+        // Step 4: Run the conversion command
+        await ffmpeg.exec(['-i', 'input.webm', '-c:a', 'libopus', 'output.opus']);
+
+        // Step 5: Read the output file as a Uint8Array
+        const outputData = await ffmpeg.readFile('output.opus');
+
+        // Step 6: Convert the output to a Blob (if required)
+        const opusBlob = new Blob([outputData], { type: 'audio/opus' });
+
+        return opusBlob; // Now you have your opus Blob
+    }
+
     const startMediaRecording = () => {
         if (mediaRecorder.current) {
             mediaRecorder.current.start();
@@ -25,14 +51,15 @@ export const useRecordVoice = () => {
     };
 
     const initializeMediaRecorder = (stream: MediaStream) => {
-        const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm; codecs=opus' });
         recorder.ondataavailable = (event) => {
             chunks.current.push(event.data);
         };
 
-        recorder.onstop = () => {
-            const webmBlob = new Blob(chunks.current, { type: 'audio/webm' });
-            harkStoppedRef.current===false && setAudioBlob(webmBlob);
+        recorder.onstop = async () => {
+            const webmBlob = new Blob(chunks.current, { type: 'audio/webm; codecs=opus' });
+            const blob = await convertBlobToOpus(webmBlob)
+            harkStoppedRef.current === false && setAudioBlob(blob);
             chunks.current = []; // Reset chunks for the next recording
         };
 
@@ -40,7 +67,8 @@ export const useRecordVoice = () => {
     };
 
     const startRecording = () => {
-        if(!mediaRecorder.current) return;
+        console.log({MC: mediaRecorder.current})
+        if (!mediaRecorder.current) return;
         const harkEvents = hark(mediaRecorder.current?.stream);
         harkEventsRef.current = harkEvents;
 
@@ -60,7 +88,7 @@ export const useRecordVoice = () => {
             }, silenceDuration); // Stop recording after silence duration
         });
 
-        harkStoppedRef.current=false
+        harkStoppedRef.current = false
     };
 
     const stopRecording = () => {
@@ -82,7 +110,7 @@ export const useRecordVoice = () => {
         }
 
         return () => {
-           stopRecording()
+            stopRecording()
         };
     }, []);
 

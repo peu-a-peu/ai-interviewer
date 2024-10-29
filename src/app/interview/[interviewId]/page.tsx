@@ -8,9 +8,10 @@ import { useRecordVoice } from "@/app/components/hooks/useAudioRecord";
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { api } from '@/trpc/react';
+import { useTranslations } from 'next-intl';
 
 export default function ViewPage({ params }: { params: { interviewId: string } }) {
-
+    const t = useTranslations()
     const { interviewId } = params;
     const mutation = api.interview.closeInterview.useMutation()
     const {data:summary,refetch,} = api.interview.evaluateAnswers.useQuery({interviewId},{enabled:false})
@@ -94,6 +95,10 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
         getQuestion(interviewId, audioBlob as Blob)
     }, [interviewId, audioBlob])
 
+    useEffect(()=>{
+        startRecording()
+        return ()=>stopRecording()
+    },[])
 
     async function closeInterview() {
         await mutation.mutateAsync({ interviewId })
@@ -108,24 +113,24 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
                     <div onClick={() => openModal('close')}><Cross /></div>
 
                     <Modal isOpen={modals['summary'].show} onClose={() => closeModal('summary')}>
-                        <h1>Interview Summary</h1>
+                        <h1>{t(`Interview Summary`)}</h1>
                         <p>
                             {summary}
                         </p>
                         <Button onClick={() => { closeModal('summary'), router.replace("/") }} extraClasses='flex-grow' variant='primary'>OK</Button>
                     </Modal>
                     <Modal isOpen={modals['close'].show} onClose={() => closeModal('close')}>
-                        <p className='text-sm text-center text-black font-medium'>면접을 중단하시겠어요?</p>
+                        <p className='text-sm text-center text-black font-medium'>{t(`Would you like to stop the interview?`)}</p>
                         <div className="flex justify-between mt-5 gap-3 flex-wrap">
-                            <Button isLoading={mutation.isPending} extraClasses='flex-grow' variant='primary' onClick={closeInterview}>계속 할래요</Button>
-                            <Button extraClasses='flex-grow' variant='secondary' onClick={() => closeModal('close')}>계속 할래요</Button>
+                            <Button isLoading={mutation.isPending} extraClasses='flex-grow' variant='primary' onClick={closeInterview}>{t(`Yes`)}</Button>
+                            <Button extraClasses='flex-grow' variant='secondary' onClick={() => closeModal('close')}>{t(`No`)}</Button>
                         </div>
                     </Modal>
 
                     <Modal isOpen={modals['error'].show} onClose={() => { closeModal('error') }}>
                         <p className='text-sm text-center text-black font-medium'>{modals['error'].msg}</p>
                         <div className="flex justify-between mt-5 gap-3 flex-wrap">
-                            <Button onClick={() => { closeModal('error') }} extraClasses='flex-grow' variant='primary'>Close</Button>
+                            <Button onClick={() => { closeModal('error') }} extraClasses='flex-grow' variant='primary'>{t(`Close`)}</Button>
                         </div>
                     </Modal>
 

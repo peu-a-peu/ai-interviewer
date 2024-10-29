@@ -1,4 +1,4 @@
-import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import { ChatCompletionContentPartText, ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
 export type OpenAIMessageRole = "user"|"function"|"assistant"|"system" 
 
@@ -13,8 +13,10 @@ export interface SystemPromptInput extends InterviewInput {
     created_at?:Date;
 }
 
+export type OpenAIContent = string | Array<ChatCompletionContentPartText>;
+
 export interface GetOpenAiResponseParam{
-    prompt:string;
+    prompt:OpenAIContent;
     role:OpenAIMessageRole;
     messageContext?:ChatCompletionMessageParam[];
 }

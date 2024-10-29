@@ -16,12 +16,12 @@ export async function POST(request: NextRequest, res:NextResponse) {
         return NextResponse.json({ message: 'No audio available' }, { status: 204 });
     }
     // Convert Blob to ArrayBuffer or Buffer
-    const buffer = Buffer.from(await mp3.arrayBuffer());
+    const buffer = Buffer.from(mp3,'base64');
 
     // Create a response with the appropriate headers
     const response = new NextResponse(buffer, {
         headers: {
-            'Content-Type': 'audio/webm',
+            'Content-Type': 'audio/webm; codecs=opus',
             'Content-Disposition': 'attachment; filename="audio.webm"',
             'interview-over':isOver ? 'Y':'N'
         },
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest, res:NextResponse) {
 
     return response;
 }catch(err){
+    console.log(err)
     if(err instanceof CustomError){
         return NextResponse.json({ message: err.message }, { status: err.statusCode });
     }

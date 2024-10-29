@@ -5,7 +5,8 @@ import { NewInterview } from "@/server/interfaces/drizzle";
 import QuestionsService from "../services/QuestionsService";
 import CustomError from "@/app/components/utils/CustomError";
 import { evaluationPrompt, getSystemPrompt } from "@/server/libs/system-prompt";
-import { SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
+import { OpenAIContent, SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
+import { ChatAIResponse } from "../services/AiChatService";
 
 class InterviewController {
     static chatService = AiFactory.getChatService()
@@ -35,10 +36,12 @@ class InterviewController {
             created_at
         } as SystemPromptInput)
 
-        let lastAns = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
+        let lastAns:OpenAIContent="", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
-            const data = await this.audioService.convertAudioToText(audio)
-            lastAns = data.text
+            const buffer = await audio.arrayBuffer();
+            const base64str = Buffer.from(buffer).toString("base64");
+            console.log({base64str})
+            lastAns = {type:"input_audio", input_audio:{data:base64str, format:"wav"}} as any;
         }
         const messageContext: ChatCompletionMessageParam[] = []
         conversations.forEach(({ question, answer, conversation_id }, index) => {
@@ -54,40 +57,40 @@ class InterviewController {
 
         console.log(prompt)
         console.log(messageContext)
-        let aiResponse: string = await this.chatService.getAiResponse({
-            messageContext,
+        let aiResponse: ChatAIResponse = await this.chatService.getAiResponse({
             prompt,
+            messageContext,
             role: "system"
         })
 
-        const isOver = aiResponse.includes("%EXIT%")
-        if (isOver) {
-            aiResponse = aiResponse.replace('%EXIT%', '')
-            await InterviewService.closeInterview(interviewId)
-        }
+        // const isOver = aiResponse.includes("%EXIT%")
+        // if (isOver) {
+        //     aiResponse = aiResponse.replace('%EXIT%', '')
+        //     await InterviewService.closeInterview(interviewId)
+        // }
 
         await Promise.all([
-            InterviewService.addConversation(interviewId, aiResponse),
-            lastConversationId && InterviewService.updateConversation(lastConversationId, lastAns)
+            InterviewService.addConversation(interviewId, aiResponse.text),
+            lastConversationId && InterviewService.updateConversation(lastConversationId, "")
         ])
 
-        let mp3;
-        if (aiResponse) {
-            mp3 = await this.audioService.convertTextToAudio(aiResponse)
-        }
-        return { mp3, isOver }
+        // let mp3;
+        // if (aiResponse) {
+        //     mp3 = await this.audioService.convertTextToAudio(aiResponse)
+        // }
+        return { mp3: aiResponse.base64audio, isOver:false }
     }
 
     static async summarizeResume(resumeContent: string) {
         const prompt = `Extract the candidate's name, total years of experience, industries or domains worked in, and tools and technologies used from the following resume text. Present this information in a single, coherent paragraph of no more than 300 words, ensuring to exclude irrelevant details."
 Resume text: ${resumeContent}`
 
-        const aiResponse: string = await this.chatService.getAiResponse({
-            prompt,
-            role: "system"
-        })
+        // const aiResponse: string = await this.chatService.getAiResponse({
+        //     prompt,
+        //     role: "system"
+        // })
 
-        return aiResponse;
+        // return aiResponse;
     }
 
 
@@ -113,17 +116,18 @@ Resume text: ${resumeContent}`
             })
         });
 
-        const aiResponse: string = await this.chatService.getAiResponse({
-            prompt: evaluationPrompt({
-                experience,
-                interview_type,
-                resume_summary,
-                position,
-            } as SystemPromptInput),
-            role: "system",
-            messageContext
+        let aiResponse=""
+        // const aiResponse: string = await this.chatService.getAiResponse({
+        //     prompt: evaluationPrompt({
+        //         experience,
+        //         interview_type,
+        //         resume_summary,
+        //         position,
+        //     } as SystemPromptInput),
+        //     role: "system",
+        //     messageContext
 
-        })
+        // })
 
         return aiResponse;
 

@@ -18,10 +18,17 @@ class OpenAiChatService implements ChatService{
       
         const res = await  this.instance.client.chat.completions.create({
             model: env.OPENAI_CHAT_MODEL!,
+            modalities: ["text", "audio"],
+            //@ts-ignore
+            audio: { voice: "alloy", format: "wav" },
             messages
         })
 
-        return res.choices[0]?.message.content || ""
+        console.log(res.choices[0]?.message)
+
+        let audio = res.choices[0]?.message?.audio
+        console.log(audio)
+        return {base64audio: audio?.data || "", text: audio?.transcript || "", id: audio?.id || ""}
     }
 
 }
