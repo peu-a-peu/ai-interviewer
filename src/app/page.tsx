@@ -1,9 +1,14 @@
 'use client';
 import { useTranslations } from "next-intl";
 import StartInterviewForm from "./components/form/StartInterviewForm";
-
+import { useEffect } from "react";
+import { setUserLocale } from "./services/locale";
 export default function Home() {
   const t = useTranslations()
+  useEffect(()=>{
+    const browserLocale = navigator.language || navigator.languages[0] || "en";
+    setUserLocale(browserLocale)
+  },[])
   return (
     <section className="max-w-3xl mx-auto min-h-screen py-16 px-3">
       <h1 className="text-3xl font-bold text-black text-center">{t(`Practice with an AI interviewer trained on 40,000 real exam questions to increase your chances of passing!`)}</h1>
