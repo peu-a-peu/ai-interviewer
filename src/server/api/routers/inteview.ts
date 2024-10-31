@@ -12,6 +12,7 @@ export const interviewRouter = createTRPCRouter({
       interview_type: z.string().optional(),
       experience: z.number().optional(),
       resume_summary: z.string().optional(),
+      category: z.string().optional()
     }).strict())
     .query(async ({ input, ctx }) => {
       const res = await InterviewController.createInterview({ interview_id: "", ...input })

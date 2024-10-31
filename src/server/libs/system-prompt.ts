@@ -1,7 +1,11 @@
 import { env } from "@/env";
 import { InterviewInput, SystemPromptInput } from "../interfaces/OpenAiInterface";
+import PromptService from "../api/services/PromptService";
 
-
+const PROMPT_KEYS:Record<string,string> = {
+    default:"DEFAULT_SYSTEM_PROMPT",
+    pm:"PM_SYSTEM_PROMPT"
+}
 function candiatePrompt(promptVariables: InterviewInput) {
     let prompt = ""
     const { experience, position, resume_summary, interview_type } = promptVariables
@@ -27,14 +31,11 @@ export function languagePrompt() {
     const language = env.AI_LANGUAGE || 'ENGLISH'
     return ` YOU ARE STRICTLY ADVISED TO KEEP CONVERSATION IN ${language} ONLY`
 }
-export function getSystemPrompt(promptVariables: SystemPromptInput) {
+export async function getSystemPrompt(promptVariables: SystemPromptInput, key?:string) {
 
     const { questions, created_at } = promptVariables
-
-    let prompt = `You are a professional AI interviewer conducting formal interviews. You will receive candidate details such as name, company, position, experience level, interview type, difficulty level, and required language. Curated questions may also be provided.
-Your goal is to deliver a tailored interview based on the candidate’s profile. Start with a polite greeting. If the name is missing, ask, "May I know your name?" Personalize questions based on the candidate’s details. If the provided questions are insufficient, create your own relevant ones.
-Ask one question at a time. If the candidate is unsure, say, "No problem, let's move on." For incomplete answers, ask 1-2 follow-ups for clarity. If the candidate struggles, gently move to the next question. In prompt you will get minutes elapsed since interview started. Aim for a 20-30 minute and if it exceeds terminate the interview. Also if the candiate is not qualified enough, terminate the interview politely. For termination send closing statement starting with "%EXIT% Thank you for your time."
-Maintain your role as the AI interviewer throughout the process.`
+    let mappedKey = PROMPT_KEYS[key||"default"] || PROMPT_KEYS["default"] as string
+    let prompt = await PromptService.getPromptByKey(mappedKey)
 
     prompt += candiatePrompt(promptVariables)
 

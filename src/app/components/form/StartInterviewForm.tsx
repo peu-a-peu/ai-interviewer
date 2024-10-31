@@ -9,7 +9,7 @@ import { api } from "@/trpc/react";
 import { z } from "zod";
 import clsx from "clsx";
 import Select from "../ui/Select";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 const interviewTypes = ['인성면접', 'PT면접', '토론면접', '일반면접', '임원면접']
 
@@ -36,6 +36,7 @@ const initialState: FormData = {
 }
 export default function StartInterviewForm() {
     const t = useTranslations()
+    const pathname = usePathname()
     const apiUtil = api.useUtils()
     const router = useRouter()
     const [selected, setSelected] = useState<Option>()
@@ -44,7 +45,7 @@ export default function StartInterviewForm() {
     const [options, setOptions] = useState<Option[]>([])
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState<File>()
-
+    const category = pathname.split("/")?.[1] || "default"
     const interviewTypesText = [
         t("Personality Interview"),
         t("Presentation Interview"),
@@ -87,7 +88,8 @@ export default function StartInterviewForm() {
         try {
             setLoading(true)
             let data = await apiUtil.interview.createInterview.fetch({
-                ...formData
+                ...formData,
+                category
             })
             router.push(`/interview/${data}`)
         } catch (err) {

@@ -25,15 +25,15 @@ class InterviewController {
             QuestionsService.getQuestionsForCompany(currentInterview)
         ])
 
-        const { experience, interview_type, resume_summary, position,created_at } = currentInterview
-        const prompt = getSystemPrompt({
+        const { experience, interview_type, resume_summary, position,created_at, category } = currentInterview
+        const prompt = await getSystemPrompt({
             experience,
             interview_type,
             resume_summary,
             position,
             questions,
             created_at
-        } as SystemPromptInput)
+        } as SystemPromptInput, category)
 
         let lastAns = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
