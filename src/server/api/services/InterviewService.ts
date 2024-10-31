@@ -2,6 +2,7 @@ import { ulid } from "ulidx";
 import InterviewRepository from "../repostitory/InterviewRepository";
 import { Interview, NewInterview } from "@/server/interfaces/drizzle";
 import ConversationRepository from "../repostitory/ConversationRepository";
+import { VALID_INTERVIEW_CATEGORIES } from "@/server/constants/constant";
 
 class InterviewService {
 
@@ -11,6 +12,7 @@ class InterviewService {
 
     static async createInterview(record: NewInterview) {
         record.interview_id = ulid()
+        record.category = VALID_INTERVIEW_CATEGORIES[record?.category||""] ??  VALID_INTERVIEW_CATEGORIES.default
         return await InterviewRepository.createInterview(record)
     }
 

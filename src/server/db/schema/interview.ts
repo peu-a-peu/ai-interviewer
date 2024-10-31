@@ -16,6 +16,7 @@ import {
       interview_type: varchar("interview_type",{length:50}),
       experience: integer("experience"),
       resume_summary: text("resume_summary"),
+      category: varchar("category",{length:15}).default("default").notNull(),
       created_at: timestamp('created_at').defaultNow().notNull(),
       ended_at: timestamp('ended_at')
     })
