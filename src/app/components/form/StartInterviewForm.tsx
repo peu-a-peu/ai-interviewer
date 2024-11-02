@@ -58,7 +58,7 @@ export default function StartInterviewForm() {
     async function handleSearch(query: string): Promise<Option[]> {
         try {
             let data = await apiUtil.company.searchCompanyByName.fetch({ search: query })
-            return data.map(({ company_id, company_name }) => ({ id: company_id, value: company_id, label: company_name }))
+            return data.map(({ company_id, company_name, logo }) => ({ id: company_id, value: company_id, label: company_name, logo: logo as string | undefined }))
         } catch (err) {
             console.log(err)
         }
