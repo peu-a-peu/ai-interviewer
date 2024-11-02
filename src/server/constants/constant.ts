@@ -11,3 +11,7 @@ export const LOCALE_TO_COUNTRY:Record<string,string> = {
 export function getCountryFromLocale(locale:string){
     return LOCALE_TO_COUNTRY[locale] ?? LOCALE_TO_COUNTRY["en"] as string
 }
+
+export const SUPABASE_BUCKETS = {
+    COMPANY_LOGOS: "company_logos"
+}

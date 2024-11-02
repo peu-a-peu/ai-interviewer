@@ -1,6 +1,6 @@
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { prompt, question, conversation, interview, company } from '../db/schema';
-export type Company = InferSelectModel<typeof company> & { metadata: Record<string, any>  | undefined };
+export type Company = InferSelectModel<typeof company> & { metadata: unknown | Record<string, any>  | undefined };
 export type NewCompany = InferInsertModel<typeof company> & { metadata?: Record<string, any> | undefined};
 export type Question = InferSelectModel<typeof question>;
 export type NewQuestion = InferInsertModel<typeof question>;

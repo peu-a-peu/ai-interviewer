@@ -1,4 +1,4 @@
-import {config} from "dotenv"
+import { config } from "dotenv"
 config()
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
@@ -11,7 +11,7 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     OPENAI_API_KEY: z.string(),
-    OPENAI_CHAT_MODEL:z.string(),
+    OPENAI_CHAT_MODEL: z.string(),
     OPENAI_TTS_MODEL: z.string(),
     OPENAI_STT_MODEL: z.string(),
     AI_LANGUAGE: z.string(),
@@ -31,6 +31,8 @@ export const env = createEnv({
     ),
     DISCORD_CLIENT_ID: z.string(),
     DISCORD_CLIENT_SECRET: z.string(),
+    SUPABASE_STORAGE_URL: z.string(),
+    SUPABASE_STORAGE_API_KEY: z.string()
   },
 
   /**
@@ -53,11 +55,13 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
-    OPENAI_API_KEY:process.env.OPENAI_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_CHAT_MODEL: process.env.OPENAI_CHAT_MODEL,
     OPENAI_TTS_MODEL: process.env.OPENAI_TTS_MODEL,
     OPENAI_STT_MODEL: process.env.OPENAI_STT_MODEL,
-    AI_LANGUAGE: process.env.AI_LANGUAGE
+    AI_LANGUAGE: process.env.AI_LANGUAGE,
+    SUPABASE_STORAGE_URL: process.env.SUPABASE_STORAGE_URL,
+    SUPABASE_STORAGE_API_KEY:process.env.SUPABASE_STORAGE_API_KEY
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
