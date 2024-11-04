@@ -8,12 +8,14 @@ import { useRecordVoice } from "@/app/components/hooks/useAudioRecord";
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { api } from '@/trpc/react';
+import Lottie from "react-lottie-player"
+import SpeakingAnimation from "../../lotties/speaking.json"
 
 export default function ViewPage({ params }: { params: { interviewId: string } }) {
 
     const { interviewId } = params;
     const mutation = api.interview.closeInterview.useMutation()
-    const {data:summary,refetch,} = api.interview.evaluateAnswers.useQuery({interviewId},{enabled:false})
+    const { data: summary, refetch, } = api.interview.evaluateAnswers.useQuery({ interviewId }, { enabled: false })
     const router = useRouter()
     const { recordingStatus, audioBlob, startRecording, stopRecording } = useRecordVoice();
     const [modals, showModals] = useState<any>({
@@ -53,7 +55,7 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
                 openModal('error', res.message)
             }
 
-            const  isOver = response.headers.get("interview-over")=='Y'
+            const isOver = response.headers.get("interview-over") == 'Y'
             // Convert the response to a Blob
             const audioBlob = await response.blob();
 
@@ -63,12 +65,12 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
             // Create an audio element and play the audio
             const audio = new Audio(audioUrl);
             // Define the event listener
-            const onEnded = async() => {
+            const onEnded = async () => {
                 console.log('Audio playback has finished.');
                 // Add any additional logic you want to execute when audio finishes
-                if(!isOver){
+                if (!isOver) {
                     startRecording()
-                }else{
+                } else {
                     await refetch()
                     openModal('summary')
                 }
@@ -101,9 +103,15 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
     }
     return (
         <div>
-            <section className="max-w-md mx-auto min-h-screen py-16 px-3 flex flex-col justify-between items-center">
-                <div className="assistant-speak w-36 h-36 bg-black rounded-full"></div>
-                <div className='flex justify-between w-full'>
+            <section className="relative max-w-sm mx-auto h-[calc(100vh-60px)] py-12 px-3 flex flex-col justify-center items-center">
+                <Lottie
+                    className='bottom-16 relative'
+                    loop
+                    animationData={SpeakingAnimation}
+                    play
+                    style={{ width: 150, height: 150 }}
+                />
+                <div className='absolute left-0 px-4 bottom-4 flex justify-between w-full'>
                     <div className={clsx(recordingStatus == 'inactive' ? 'mic-disabled' : "")}><Mic /></div>
                     <div onClick={() => openModal('close')}><Cross /></div>
 

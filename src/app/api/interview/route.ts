@@ -29,6 +29,7 @@ export async function POST(request: NextRequest, res:NextResponse) {
 
     return response;
 }catch(err){
+    console.log(err)
     if(err instanceof CustomError){
         return NextResponse.json({ message: err.message }, { status: err.statusCode });
     }

@@ -56,15 +56,15 @@ export default function Select<T>(props: SelectProps<T>) {
     let FilteredOptions = filterAndSortItems(options,search)
   
     return <>
-        <div className= {clsx(disabled ? "bg-gray-100 border-gray-400":"","border border-black px-5 py-3 rounded-2xl text-lg font-semibold relative")}>
+        <div className= {clsx(disabled ? "bg-gray-100 border-gray-400":"","border border-gray-300 px-4 py-3 rounded-md text-lg font-semibold relative")}>
             <div  onClick={() => setOpen(true)} className="flex items-center gap-4">
+                <input disabled={disabled} placeholder={placeholder} value={search} className="outline-none w-full text-gray-400 text-lg" type="text"  onChange={handleChange} />
                 <Search />
-                <input disabled={disabled} placeholder={placeholder} value={search} className="outline-none w-full text-gray-400" type="text"  onChange={handleChange} />
             </div>
-            {open && FilteredOptions.length != 0 && <div ref={dropdownRef} className="flex flex-col gap-1 w-full absolute top-14 left-0 border border-black rounded-2xl p-3 bg-white max-h-64 overflow-y-scroll">
+            {open && FilteredOptions.length != 0 && <div ref={dropdownRef} className="flex flex-col gap-1 w-full absolute top-[72px] left-0 border border-black rounded-2xl p-3 bg-white max-h-64 overflow-y-scroll">
                 {FilteredOptions.map((option) => <p
                     key={option.id}
-                    className={clsx("rounded-2xl py-3 px-5", selection?.value === option.value ? "!bg-purple text-white" : "hover:bg-purple-50 hover:text-purple")}
+                    className={clsx("rounded-2xl py-3 px-5", selection?.value === option.value ? "!bg-black text-white" : "hover:bg-gray-100 hover:text-black")}
                     onClick={() => { handleOptionClick(option) }}>{option.label}
                 </p>
                 )}

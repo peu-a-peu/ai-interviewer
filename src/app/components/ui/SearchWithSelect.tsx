@@ -71,18 +71,18 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
         onOptionClick(option)
     }
     return <>
-        <div className="border border-black px-5 py-3 rounded-2xl text-lg font-semibold relative">
+        <div className={clsx("border border-gray-300 p-4 rounded-md text-lg font-semibold relative",open ? "border-black":"")}>
             <div className="flex items-center gap-4">
-                <Search />
                 {selected?.logo && <img className="h-8 shrink-0" src={selected.logo} />}
                 <input onFocus={() => setOpen(true)} value={search} className="outline-none w-full text-gray-400" type="text" placeholder={placeholder} onChange={handleChange} />
                 <Loader loading={loading} />
+                <Search />
             </div>
-            {open && options.length != 0 && <div ref={dropdownRef} className="flex flex-col gap-1 w-full absolute top-14 left-0 border border-black rounded-2xl p-3 bg-white max-h-64 overflow-y-scroll">
+            {open && options.length != 0 && <div ref={dropdownRef} className="flex z-10 flex-col gap-1 w-full absolute top-[72px] left-0 border border-black rounded-md p-3 bg-white max-h-64 overflow-y-scroll">
                 {options.map((option) => <>
                     <p
                         key={option.id}
-                        className={clsx("rounded-2xl py-3 px-5 flex gap-4", selection?.value === option.value ? "!bg-purple text-white" : "hover:bg-purple-50 hover:text-purple")}
+                        className={clsx("rounded-md py-3 px-4 flex gap-4", selection?.value === option.value ? "!bg-black text-white" : "hover:bg-gray-100 hover:text-black")}
                         onClick={() => { handleOptionClick(option) }}>
                         {option.logo && <img className="h-8 shrink-0" src={option.logo} />}
                         {option.label}
