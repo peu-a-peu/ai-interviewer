@@ -2,13 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
+@layer base {
+    /* Apply font styles based on lang attribute directly */
+    html[lang="en"] {
+      @apply font-english;
+    }
+  
+    html[lang="ko"] {
+      @apply font-korean;
+      letter-spacing: -0.01em;
+    }
+  
+    /* Add other languages as needed */
+  } 
+  
+
 body {
     @apply bg-white;
+}
+
+.main-gradient {
+    background: linear-gradient(180deg, #E6F3FF 0%, #FFFFFF 100%);
+    background-size: 100% 600px;
+    background-repeat: no-repeat;
 }
 
 /* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
@@ -43,11 +65,11 @@ body {
 
     0%,
     100% {
-        height:48px;
+        height: 48px;
     }
 
     50% {
-        height:96px;
+        height: 96px;
     }
 }
 
@@ -75,40 +97,43 @@ body {
 /* Hide the default number input arrows in WebKit browsers (Chrome, Safari) */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none; /* Remove the arrows */
-    margin: 0; /* Reset margin */
+    -webkit-appearance: none;
+    /* Remove the arrows */
+    margin: 0;
+    /* Reset margin */
 }
 
 /* Hide the default number input arrows in Firefox */
 input[type="number"] {
-    -moz-appearance: textfield; /* Change the appearance */
+    -moz-appearance: textfield;
+    /* Change the appearance */
 }
 
 
-.loader{
-    animation : rotate linear 1s infinite;
+.loader {
+    animation: rotate linear 1s infinite;
 }
 
 @keyframes rotate {
-    100%{
+    100% {
         transform: rotate(360deg);
     }
 }
 
-.mic-disabled{
+.mic-disabled {
     background-color: red;
     position: relative;
     border-radius: 100%;
     overflow: hidden;
 }
 
-.mic-disabled::before{
-content:"";
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%) rotate(45deg);
-width:4px;
-height:100%;
-background-color: #ec1f5d;
+.mic-disabled::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 4px;
+    height: 100%;
+    background-color: #ec1f5d;
 }

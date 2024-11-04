@@ -2,18 +2,24 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { setUserLocale } from "../services/locale";
 import StartInterviewForm from "../components/form/StartInterviewForm";
-import { usePathname } from "next/navigation";
+import Lottie from "react-lottie-player"
+import SpeakingAnimation from "../lotties/speaking.json"
 export default function Home() {
     const t = useTranslations()
-    useEffect(()=>{
-      const browserLocale =  navigator.language || navigator.languages[0] || "en";
-      setUserLocale(browserLocale)
-    },[])
-    return (<section className="max-w-3xl mx-auto min-h-screen py-16 px-3">
-        <h1 className="text-3xl font-bold text-black text-center">{t(`Practice with an AI interviewer trained on 40,000 real exam questions to increase your chances of passing!`)}</h1>
-
+    useEffect(() => {
+        const browserLocale = navigator.language || navigator.languages[0] || "en";
+        setUserLocale(browserLocale)
+    }, [])
+    return (<section className="max-w-3xl mx-auto min-h-screen py-10 px-3">
+        <h1 className="text-[44px] md:text-5xl !leading-normal font-bold text-black text-center">{t(`Mock interviews with an AI interviewer trained on 40,000 interview questions`)}</h1>
+        <p className="text-lg text-black mt-4 text-center">{t(`Improve your success rate with practice questions and feedback on areas for improvement!`)}</p>
         <div className="dots flex justify-center items-center gap-2 py-20 h-48">
-            {new Array(4).fill(null).map((_, index) => <div style={{ '--i': index } as React.CSSProperties} className="dot w-12 h-12 rounded-full bg-black"></div>)}
+            <Lottie
+                loop
+                animationData={SpeakingAnimation}
+                play
+                style={{ width: 150, height: 150 }}
+            />
         </div>
         <StartInterviewForm />
     </section>)
