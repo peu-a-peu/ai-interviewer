@@ -3,7 +3,7 @@ export default function Label(props: LabelAttributes) {
     const {children, error,...rest} = props
     return <label {...rest} className="text-black font-bold text-lg md:text-xl mb-3 block">
         {props.children}
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
     </label>
 }
 

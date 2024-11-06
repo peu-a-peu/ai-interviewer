@@ -5,7 +5,7 @@ import { NewInterview } from "@/server/interfaces/drizzle";
 import QuestionsService from "../services/QuestionsService";
 import CustomError from "@/app/components/utils/CustomError";
 import { evaluationPrompt, getSystemPrompt } from "@/server/libs/system-prompt";
-import { SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
+import { EvaluationResponse, SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
 
 class InterviewController {
     static chatService = AiFactory.getChatService()
@@ -25,8 +25,9 @@ class InterviewController {
             QuestionsService.getQuestionsForCompany(currentInterview)
         ])
 
-        const { experience, interview_type, resume_summary, position,created_at, category } = currentInterview
+        const { experience, interview_type, resume_summary, position,created_at, category, candidate_name } = currentInterview
         const prompt = await getSystemPrompt({
+            name: candidate_name,
             experience,
             interview_type,
             resume_summary,
@@ -95,12 +96,20 @@ Resume text: ${resumeContent}`
         return await InterviewService.closeInterview(interviewId)
     }
 
-    static async evaluateAnswers(interviewId: string) {
+    
+    static async evaluateAnswers(interviewId: string):Promise<EvaluationResponse> {
         const currentInterview = await InterviewService.getInterviewById(interviewId)
         if (!currentInterview) {
             throw new CustomError("Interview not found", 404)
         }
-        const { experience, interview_type, resume_summary, position, } = currentInterview
+        const { experience, interview_type, resume_summary, position, candidate_name, feedback } = currentInterview
+        if(feedback){
+            return {
+                candidate_name,
+                position:position,
+                feedback
+            }
+        }
         const conversations = await InterviewService.getInterviewConversations(interviewId)
         const messageContext: ChatCompletionMessageParam[] = []
         conversations.forEach(({ question, answer }, index) => {
@@ -125,7 +134,13 @@ Resume text: ${resumeContent}`
 
         })
 
-        return aiResponse;
+        await InterviewService.updateInterview(interviewId,{feedback: aiResponse})
+
+        return {
+                candidate_name,
+                position:position,
+                feedback:aiResponse
+        };
 
 
     }

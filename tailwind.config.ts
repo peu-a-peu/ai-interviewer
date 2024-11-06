@@ -6,7 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'korean': ['Pretendard', 'sans-serif'],
+        'korean': ['Pretendard Variable', 'sans-serif'],
         'english': ['Inter', 'sans-serif'],
       },
       borderRadius: {

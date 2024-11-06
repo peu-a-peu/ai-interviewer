@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { company } from "@/server/db/schema";
 import { CompanyFromSearch } from "@/server/interfaces/company";
-import { and, eq, like } from "drizzle-orm";
+import { and, eq, ilike } from "drizzle-orm";
 
 class CompanyRepository {
 
@@ -10,7 +10,7 @@ class CompanyRepository {
             company_id: company.company_id,
             company_name: company.company_name,
             logo: company.logo
-        }).from(company).where(and(like(company.company_name, `%${key}%`),eq(company.country, country))).limit(limit)
+        }).from(company).where(and(ilike(company.company_name, `${key}%`),eq(company.country, country))).limit(limit)
     }
 
 }

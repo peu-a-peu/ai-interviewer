@@ -1,4 +1,10 @@
 {
+  "Name is required": "Name is required",
+  "Company is required": "Company is required",
+  "Experience should be non negative": "Experience should be non negative",
+  "Too large value for experience": "Too large value for experience",
+  "Select an interview type": "Select an interview type",
+  "Enter position for which you are applying for": "Enter position for which you are applying for",
   "Personality Interview": "Personality Interview",
   "Presentation Interview": "Presentation Interview",
   "Discussion Interview": "Discussion Interview",
@@ -12,11 +18,17 @@
   "Search job title": "Search job title",
   "Total job experience": "Total job experience",
   "Please enter total years of experience": "Please enter total years of experience",
+  "years": "years",
   "Interview type": "Interview type",
   "Upload Resume": "Upload Resume",
   "Optional": "Optional",
   "The interview quality will improve if you upload your resume": "The interview quality will improve if you upload your resume",
   "Experience a mock interview for free once": "Experience a mock interview for free once",
+  "Mock interview results": "Mock interview results",
+  "The interview has ended. Check out your strengths and points of improvement!": "The interview has ended. Check out your strengths and points of improvement!",
+  "As you gain more experience, I hope you will further strengthen your strengths and make improvements": "As you gain more experience, I hope you will further strengthen your strengths and make improvements",
+  "I hope you get good results": "I hope you get good results",
+  "Go to home": "Go to home",
   "Mock interviews with an AI interviewer trained on 40,000 interview questions": "Mock interviews with an AI interviewer trained on 40,000 interview questions",
   "Improve your success rate with practice questions and feedback on areas for improvement!": "Improve your success rate with practice questions and feedback on areas for improvement!"
 }

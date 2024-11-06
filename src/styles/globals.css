@@ -27,6 +27,15 @@ body {
     @apply bg-white;
 }
 
+input {
+    @apply text-gray-950;
+  }
+  
+  /* Placeholder text color */
+  input::placeholder {
+    @apply text-gray-400;
+  }
+
 .main-gradient {
     background: linear-gradient(180deg, #E6F3FF 0%, #FFFFFF 100%);
     background-size: 100% 600px;

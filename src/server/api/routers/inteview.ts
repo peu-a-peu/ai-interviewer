@@ -7,7 +7,7 @@ export const interviewRouter = createTRPCRouter({
 
   createInterview: publicProcedure
     .input(z.object({
-      candiate_name: z.string(),
+      candidate_name: z.string(),
       company_id: z.string(),
       position: z.string().optional(),
       interview_type: z.string().optional(),

@@ -12,6 +12,7 @@ interface SearchWithSelectProps<T> {
     onOptionClick: (option: Option) => void;
     debounceDelay?: number
     selected?: Option
+    error?: string
 }
 
 export interface Option {
@@ -22,7 +23,7 @@ export interface Option {
 }
 
 export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
-    const { searchValue, placeholder = "", onSearch, onOptionClick, debounceDelay = 300, selected } = props;
+    const { searchValue, placeholder = "", onSearch, onOptionClick, debounceDelay = 300, selected, error } = props;
     const [search, setSearch] = useState<string>(searchValue || '')
     const [options, setOptions] = useState<Option[]>([])
     const [open, setOpen] = useState(false)
@@ -71,10 +72,10 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
         onOptionClick(option)
     }
     return <>
-        <div className={clsx("border border-gray-300 p-4 rounded-md text-lg font-semibold relative",open ? "border-black":"")}>
+        <div className={clsx("border border-gray-300 p-4 rounded-md text-lg font-semibold relative", open ? "border-black" : "", error ? "border-red-500" : "",)}>
             <div className="flex items-center gap-4">
                 {selected?.logo && <img className="h-8 shrink-0" src={selected.logo} />}
-                <input onFocus={() => setOpen(true)} value={search} className="outline-none w-full text-gray-400" type="text" placeholder={placeholder} onChange={handleChange} />
+                <input onFocus={() => setOpen(true)} value={search} className="outline-none w-full" type="text" placeholder={placeholder} onChange={handleChange} />
                 <Loader loading={loading} />
                 <Search />
             </div>
@@ -92,7 +93,8 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
             </div>}
 
         </div>
-        {msg && <p className="text-xs mt-2 text-orange-500 font-semibold">{msg}</p>}
+        {msg && <p className="text-xs mt-2.5 text-orange-500 font-medium">{msg}</p>}
+        {error && <p className="text-xs mt-2.5 text-red-500 font-medium">{error}</p>}
 
     </>
 }

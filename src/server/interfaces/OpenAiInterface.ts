@@ -3,6 +3,7 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 export type OpenAIMessageRole = "user"|"function"|"assistant"|"system" 
 
 export interface InterviewInput{
+    name:string;
     experience?:number;
     interview_type?:string;
     resume_summary?:string;
@@ -17,4 +18,9 @@ export interface GetOpenAiResponseParam{
     prompt:string;
     role:OpenAIMessageRole;
     messageContext?:ChatCompletionMessageParam[];
+}
+export type EvaluationResponse = {
+    candidate_name:string | null;
+    position:string | null;
+    feedback:string;
 }

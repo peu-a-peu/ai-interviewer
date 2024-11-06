@@ -10,34 +10,36 @@ import { z } from "zod";
 import clsx from "clsx";
 import Select from "../ui/Select";
 import { usePathname, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-const interviewTypes = ['인성면접', 'PT면접', '토론면접', '일반면접', '임원면접']
+import { useLocale, useTranslations } from "next-intl";
+import { INTERVIEW_TYPES, POSITION_TYPES } from "@/app/constants/values";
+import { getUserLocale } from "@/app/services/locale";
 
 
 
-const formSchema = z.object({
-    candiate_name: z.string().min(1, {message:"Name is required"}),
-    company_id: z.string().min(1, { message: "회사 이름은 필수입니다" }),
-    experience: z.number().gt(0, { message: "경력은 0보다 커야 합니다" }).lt(100, { message: "경력은 100보다 작아야 합니다" }),
-    interview_type: z.string().min(1, { message: "면접 유형은 필수입니다" }),
-    resume_summary: z.string(),
-    position: z.string()
-});
 
-
-// Infer TypeScript types from the schema
-type FormData = z.infer<typeof formSchema>;
-
-const initialState: FormData = {
-    candiate_name:"",
-    company_id: '',
-    experience: 0,
-    interview_type: '',
-    resume_summary: '',
-    position: ''
-}
 export default function StartInterviewForm() {
     const t = useTranslations()
+    const formSchema = z.object({
+        candidate_name: z.string().min(1, { message: t("Name is required") }),
+        company_id: z.string().min(1, { message: t("Company is required") }),
+        experience: z.number().gt(-1, { message: t("Experience should be non negative") }).lt(100, { message: t("Too large value for experience") }),
+        interview_type: z.string().min(1, { message: t("Select an interview type") }),
+        resume_summary: z.string(),
+        position: z.string().min(1, { message: t("Enter position for which you are applying for") })
+    });
+
+
+    // Infer TypeScript types from the schema
+    type FormData = z.infer<typeof formSchema>;
+
+    const initialState: FormData = {
+        candidate_name: "",
+        company_id: '',
+        experience: 0,
+        interview_type: '',
+        resume_summary: '',
+        position: ''
+    }
     const pathname = usePathname()
     const apiUtil = api.useUtils()
     const router = useRouter()
@@ -48,13 +50,31 @@ export default function StartInterviewForm() {
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState<File>()
     const category = pathname.split("/")?.[1] || "default"
-    const interviewTypesText = [
-        t("Personality Interview"),
-        t("Presentation Interview"),
-        t("Discussion Interview"),
-        t("General Interview"),
-        t("Executive Interview")
-    ]
+    const locale = useLocale()
+
+    let interviewTypes:string[] = []
+    let interviewTypesText:string[] = []
+    if (INTERVIEW_TYPES[category] || locale=='en') {
+        interviewTypes = INTERVIEW_TYPES["pm"]!
+        interviewTypesText = INTERVIEW_TYPES["pm"]!
+    } else {
+        interviewTypes = ['인성면접', 'PT면접', '토론면접', '일반면접', '임원면접']
+        interviewTypesText = [
+            t("Personality Interview"),
+            t("Presentation Interview"),
+            t("Discussion Interview"),
+            t("General Interview"),
+            t("Executive Interview")
+        ]
+    }
+
+    useEffect(()=>{
+        if( locale=='en'){
+            setOptions(POSITION_TYPES["pm"]!.map((item)=>({id:item,value:item,label:item})))
+        }
+    },[locale])
+
+
 
 
     async function handleSearch(query: string): Promise<Option[]> {
@@ -148,17 +168,18 @@ export default function StartInterviewForm() {
     }
 
     useEffect(() => {
-        selected && getCompanyRoles(selected.value)
+        selected && locale!=='en' && getCompanyRoles(selected.value)
     }, [selected])
 
     return <form className="max-w-xl flex flex-col gap-8 mx-auto" onSubmit={loading ? () => { } : handleSubmit}>
         <div>
             <Label>{t('Name')}</Label>
-            <Input onChange={(e) => handleChange('candiate_name', e.target.value)} placeholder={t(`Please enter your name`)} />
+            <Input value={formData.candidate_name} error={formErrors?.candidate_name} onChange={(e) => handleChange('candidate_name', e.target.value)} placeholder={t(`Please enter your name`)} />
         </div>
         <div>
-            <Label error={formErrors?.company_id}>{t(`Company`)}</Label>
+            <Label>{t(`Company`)}</Label>
             <SearchWithSelect
+                error={formErrors?.company_id}
                 placeholder={t("Please enter the company name here")}
                 selected={selected}
                 onSearch={handleSearch}
@@ -167,11 +188,11 @@ export default function StartInterviewForm() {
         </div>
         <div>
             <Label>{t(`Job title`)}</Label>
-            <Select placeholder={t(`Search job title`)} disabled={!formData.company_id} options={options} onOptionClick={(option) => { handleChange('position', option.value) }} />
+            <Select error={formErrors?.position} placeholder={t(`Search job title`)} options={options} onOptionClick={(option) => { handleChange('position', option.value) }} />
         </div>
         <div>
-            <Label error={formErrors?.experience}>{t(`Total job experience`)}</Label>
-            <Input onChange={(e) => handleChange('experience', parseInt(e.target.value))} type="number" classes="w-16" placeholder={t(`Please enter total years of experience`)} />
+            <Label>{t(`Total job experience`)}</Label>
+            <Input value={formData.experience} error={formErrors?.experience} onChange={(e) => handleChange('experience', parseInt(e.target.value))} type="number" classes="w-16" placeholder={t(`Please enter total years of experience`)} tailText={t("years")} />
         </div>
         <div>
             <Label error={formErrors?.interview_type}>{t(`Interview type`)}</Label>
@@ -180,12 +201,12 @@ export default function StartInterviewForm() {
             </div>
         </div>
         <div>
-            <Label error={formErrors?.resume_summary}>{t(`Upload Resume`)}  <span className="text-gray-400">({t(`Optional`)})</span></Label>
+            <Label>{t(`Upload Resume`)}  <span className="text-gray-400">({t(`Optional`)})</span></Label>
             <p className="text-gray-500 text-sm -mt-2 mb-4">{t(`The interview quality will improve if you upload your resume`)}.</p>
             <label className="rounded-md p-4 border border-gray-300 inline-block w-full text-center font-semibold text-gray-950" htmlFor={"fileUpload"}>
                 {file?.name || t(`Upload Resume`)}
             </label>
-            <Input onChange={selectFile} type="file" classes="hidden" id="fileUpload" accept="application/pdf" />
+            <Input error={formErrors?.resume_summary} onChange={selectFile} type="file" classes="hidden" id="fileUpload" accept="application/pdf" />
         </div>
         <Button isLoading={loading} >{t(`Experience a mock interview for free once`)}</Button>
 

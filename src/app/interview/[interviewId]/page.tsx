@@ -15,7 +15,6 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
 
     const { interviewId } = params;
     const mutation = api.interview.closeInterview.useMutation()
-    const { data: summary, refetch, } = api.interview.evaluateAnswers.useQuery({ interviewId }, { enabled: false })
     const router = useRouter()
     const { recordingStatus, audioBlob, startRecording, stopRecording } = useRecordVoice();
     const [modals, showModals] = useState<any>({
@@ -71,8 +70,7 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
                 if (!isOver) {
                     startRecording()
                 } else {
-                    await refetch()
-                    openModal('summary')
+                    router.replace(`/feedback/${interviewId}`)
                 }
             };
 
@@ -114,14 +112,6 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
                 <div className='absolute left-0 px-4 bottom-4 flex justify-between w-full'>
                     <div className={clsx(recordingStatus == 'inactive' ? 'mic-disabled' : "")}><Mic /></div>
                     <div onClick={() => openModal('close')}><Cross /></div>
-
-                    <Modal isOpen={modals['summary'].show} onClose={() => closeModal('summary')}>
-                        <h1>Interview Summary</h1>
-                        <p>
-                            {summary}
-                        </p>
-                        <Button onClick={() => { closeModal('summary'), router.replace("/") }} extraClasses='flex-grow' variant='primary'>OK</Button>
-                    </Modal>
                     <Modal isOpen={modals['close'].show} onClose={() => closeModal('close')}>
                         <p className='text-sm text-center text-black font-medium'>면접을 중단하시겠어요?</p>
                         <div className="flex justify-between mt-5 gap-3 flex-wrap">

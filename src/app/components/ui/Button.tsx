@@ -22,7 +22,7 @@ export default function Button(props: ButtonProps) {
     let { variant, isLoading, children, overrideClasses='',extraClasses, onClick,  ...rest } = props
     variant = variant || 'primary'
     const inverted = variant=='primary'
-    return <button onClick={isLoading? ()=>{}: onClick} className={clsx(overrideClasses||'rounded-md py-5 px-4 text-sm', isLoading ? variantLoadingClass[variant]:"", variantClass[variant], extraClasses)} {...rest}>
+    return <button onClick={isLoading? ()=>{}: onClick} className={clsx(overrideClasses||'rounded-md py-5 px-4 text-sm font-semibold', isLoading ? variantLoadingClass[variant]:"", variantClass[variant], extraClasses)} {...rest}>
         {isLoading ? <div className="w-full flex justify-center"><Loader inverted={inverted} loading={true}/></div> : children}
     </button>
 }

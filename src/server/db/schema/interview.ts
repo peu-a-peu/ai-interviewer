@@ -11,12 +11,13 @@ import {
 export const interview = pgTable("interviews", {
   interview_id: char("interview_id", { length: 26 }).primaryKey(),
   company_id: varchar("company_id", { length: 26 }).notNull(),
-  candiate_id: char("candiate_id", { length: 26 }),
-  candiate_name: varchar("candiate_name", { length: 50 }),
+  candidate_id: char("candidate_id", { length: 26 }),
+  candidate_name: varchar("candidate_name", { length: 50 }),
   position: varchar("position", { length: 50 }),
   interview_type: varchar("interview_type", { length: 50 }),
   experience: integer("experience"),
   resume_summary: text("resume_summary"),
+  feedback: text("feedback"),
   category: varchar("category", { length: 15 }).default("default").notNull(),
   created_at: timestamp('created_at').defaultNow().notNull(),
   ended_at: timestamp('ended_at')

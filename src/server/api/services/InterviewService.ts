@@ -20,6 +20,11 @@ class InterviewService {
         return await InterviewRepository.updateInterview(interviewId,{ended_at: new Date()})
     }
 
+    static async updateInterview(interviewId:string,data:Partial<Record<keyof Interview, any>>){
+        return await InterviewRepository.updateInterview(interviewId,data)
+    }
+
+
     static async getInterviewConversations(interviewId: string) {
         return await ConversationRepository.getConversationsByInterviewId(interviewId)
     }
