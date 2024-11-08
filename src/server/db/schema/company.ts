@@ -14,6 +14,7 @@ export const company = pgTable("companies", {
   logo: varchar("logo", { length: 255 }),
   metadata:jsonb("metadata"),
   is_processed: boolean("is_processed").default(false),
+  country: varchar("country",{length:10}),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 })

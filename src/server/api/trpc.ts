@@ -28,9 +28,22 @@ import { db } from "@/server/db";
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await getServerAuthSession();
+  const cookieHeader = opts.headers.get("cookie") || '';
 
+  // Manually split and find the NEXT_LOCALE cookie
+  const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+    const [key, value] = cookie.trim().split('=');
+    if (key && value) {
+      acc[key] = decodeURIComponent(value);
+    }
+    return acc;
+  }, {} as Record<string, string>);
+
+  // Extract the NEXT_LOCALE cookie, default to 'en' if not set
+  const locale = cookies.NEXT_LOCALE || 'en';
   return {
     db,
+    locale,
     session,
     ...opts,
   };
@@ -128,7 +141,15 @@ const globalErrorHandler = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware).use(globalErrorHandler);
+export const publicProcedure = t.procedure
+.use(timingMiddleware)
+.use(globalErrorHandler)
+.use(({ ctx, next }) => {
+  return next({
+    ctx: {
+      locale: ctx.locale
+    },
+  })});
 
 /**
  * Protected (authenticated) procedure
@@ -149,6 +170,7 @@ export const protectedProcedure = t.procedure
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
+        locale: ctx.locale
       },
     });
   });

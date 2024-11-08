@@ -3,6 +3,7 @@ import { ChatCompletionContentPartText, ChatCompletionMessageParam } from "opena
 export type OpenAIMessageRole = "user"|"function"|"assistant"|"system" 
 
 export interface InterviewInput{
+    name:string;
     experience?:number;
     interview_type?:string;
     resume_summary?:string;
@@ -19,4 +20,9 @@ export interface GetOpenAiResponseParam{
     prompt:OpenAIContent;
     role:OpenAIMessageRole;
     messageContext?:ChatCompletionMessageParam[];
+}
+export type EvaluationResponse = {
+    candidate_name:string | null;
+    position:string | null;
+    feedback:string;
 }

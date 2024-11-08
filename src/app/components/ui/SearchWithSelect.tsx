@@ -12,16 +12,18 @@ interface SearchWithSelectProps<T> {
     onOptionClick: (option: Option) => void;
     debounceDelay?: number
     selected?: Option
+    error?: string
 }
 
 export interface Option {
     id: number | string;
     value: any;
     label: string;
+    logo?: string;
 }
 
 export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
-    const { searchValue, placeholder = "", onSearch, onOptionClick, debounceDelay = 300, selected } = props;
+    const { searchValue, placeholder = "", onSearch, onOptionClick, debounceDelay = 300, selected, error } = props;
     const [search, setSearch] = useState<string>(searchValue || '')
     const [options, setOptions] = useState<Option[]>([])
     const [open, setOpen] = useState(false)
@@ -31,9 +33,9 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
     const [msg, setMsg] = useState('')
 
     const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
     useClickOutside(dropdownRef, () => setOpen(false));
-  
+
     useEffect(() => {
 
     }, [searchValue])
@@ -41,9 +43,9 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
     async function callApi(val: string) {
         setLoading(true)
         const options = await onSearch(val)
-        if(!options.length){
+        if (!options.length) {
             setMsg("결과를 찾을 수 없습니다: 다른 키워드로 다시 시도해 주세요.")
-        }else{
+        } else {
             setMsg("")
         }
         setOptions(options)
@@ -70,23 +72,29 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
         onOptionClick(option)
     }
     return <>
-        <div className="border border-black px-5 py-3 rounded-2xl text-lg font-semibold relative">
+        <div className={clsx("border border-gray-300 p-4 rounded-md text-lg font-semibold relative", open ? "border-black" : "", error ? "border-red-500" : "",)}>
             <div className="flex items-center gap-4">
-                <Search />
-                <input onFocus={() => setOpen(true)} value={search} className="outline-none w-full text-gray-400" type="text" placeholder={placeholder} onChange={handleChange} />
+                {selected?.logo && <img className="h-8 shrink-0" src={selected.logo} />}
+                <input onFocus={() => setOpen(true)} value={search} className="outline-none w-full" type="text" placeholder={placeholder} onChange={handleChange} />
                 <Loader loading={loading} />
+                <Search />
             </div>
-            {open && options.length != 0 && <div ref={dropdownRef} className="flex flex-col gap-1 w-full absolute top-14 left-0 border border-black rounded-2xl p-3 bg-white max-h-64 overflow-y-scroll">
-                {options.map((option) => <p
-                    key={option.id}
-                    className={clsx("rounded-2xl py-3 px-5", selection?.value === option.value ? "!bg-purple text-white" : "hover:bg-purple-50 hover:text-purple")}
-                    onClick={() => { handleOptionClick(option) }}>{option.label}
-                </p>
+            {open && options.length != 0 && <div ref={dropdownRef} className="flex z-10 flex-col gap-1 w-full absolute top-[72px] left-0 border border-black rounded-md p-3 bg-white max-h-64 overflow-y-scroll">
+                {options.map((option) => <>
+                    <p
+                        key={option.id}
+                        className={clsx("rounded-md py-3 px-4 flex gap-4", selection?.value === option.value ? "!bg-black text-white" : "hover:bg-gray-100 hover:text-black")}
+                        onClick={() => { handleOptionClick(option) }}>
+                        {option.logo && <img className="h-8 shrink-0" src={option.logo} />}
+                        {option.label}
+                    </p>
+                </>
                 )}
             </div>}
 
         </div>
-        {msg && <p className="text-xs mt-2 text-orange-500 font-semibold">{msg}</p>}
+        {msg && <p className="text-xs mt-2.5 text-orange-500 font-medium">{msg}</p>}
+        {error && <p className="text-xs mt-2.5 text-red-500 font-medium">{error}</p>}
 
     </>
 }

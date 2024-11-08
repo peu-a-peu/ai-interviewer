@@ -1,11 +1,19 @@
 import { env } from "@/env";
 import { InterviewInput, SystemPromptInput } from "../interfaces/OpenAiInterface";
+import PromptService from "../api/services/PromptService";
 
-
+const PROMPT_KEYS: Record<string, string> = {
+    default: "DEFAULT_SYSTEM_PROMPT",
+    pm: "PM_SYSTEM_PROMPT"
+}
 function candiatePrompt(promptVariables: InterviewInput) {
+    console.log({promptVariables})
     let prompt = ""
-    const { experience, position, resume_summary, interview_type } = promptVariables
-    prompt += "Here' more info about the candidate: "
+    const { experience, position, resume_summary, interview_type, name } = promptVariables
+    prompt += " Here's candidate profile: "
+    if (name) {
+        prompt += `candidate name is ${name}`
+    }
     if (experience) {
         prompt += ` candiate has ${experience} years of experience,`
     }
@@ -27,35 +35,42 @@ export function languagePrompt() {
     const language = env.AI_LANGUAGE || 'ENGLISH'
     return ` YOU ARE STRICTLY ADVISED TO KEEP CONVERSATION IN ${language} ONLY`
 }
-export function getSystemPrompt(promptVariables: SystemPromptInput) {
+export async function getSystemPrompt(promptVariables: SystemPromptInput, key?: string) {
 
     const { questions, created_at } = promptVariables
-
-    let prompt = `You are a professional AI interviewer conducting audio interviews. You will receive candidate details such as name, company, position, experience level, interview type, difficulty level, and required language. Curated questions may also be provided.
-Your goal is to deliver a tailored interview based on the candidate’s profile. Start with a polite greeting. If the name is missing, ask, "May I know your name?" Personalize questions based on the candidate’s details. If the provided questions are insufficient, create your own relevant ones.
-Ask one question at a time. If the candidate is unsure, say, "No problem, let's move on." For incomplete answers, ask 1-2 follow-ups for clarity. If the candidate struggles, gently move to the next question. In prompt you will get minutes elapsed since interview started. Aim for a 20-30 minute and if it exceeds terminate the interview. Also if the candiate is not qualified enough, terminate the interview politely. Include a metadata 'isClosed' in your response to signify whether you have stopped the interview or not."
-Maintain your role as the AI interviewer throughout the process.`
-
+    let mappedKey = PROMPT_KEYS[key || "default"] || PROMPT_KEYS["default"] as string
+    let prompt = await PromptService.getPromptByKey(mappedKey)
+    console.log({P1: prompt})
     prompt += candiatePrompt(promptVariables)
-
+    console.log({P2: prompt})
     if (questions?.length) {
         prompt += `\n These are the few questions you can ask to candidate. \n`
         prompt += questions.map((item, index) => `${index + 1}. ${item}`).join(`\n`)
     }
-    if(created_at){
-        let mins:number = Math.floor((new Date(created_at).valueOf() - new Date().valueOf())/60000)
-        prompt+=`It has been ${mins} since the interview started.`
-     }
- 
+    if (created_at) {
+        console.log({created_at, diff: (new Date().valueOf() - new Date(created_at).valueOf())})
+        let mins: number = Math.floor((new Date().valueOf() - new Date(created_at).valueOf()) / 60000)
+        prompt += ` It has been ${mins} minutes since the interview started.`
+    }
+
 
     prompt += languagePrompt()
-
+    console.log({P3: prompt})
     return prompt
 }
 
 
 export function evaluationPrompt(promptVariables: InterviewInput) {
-    let prompt = `As an AI interviewer you now have to evaluate the candiate responses and provide a summary with specific feedback on strengths and areas for improvement. Use "you" in your feedback to keep it direct and constructive`
+    let prompt = `As an AI interviewer you now have to evaluate the candiate responses and return direct json object as response having keys 'Strengths' and 'Improvements' something like this. 
+    {
+    "Strengths": {
+    "Communication": "Clearly articulated thought process during technical explanations.",
+  },
+  "Improvements": {
+    "Attention to Detail": "Missed a few minor edge cases during problem-solving exercises.",
+  }
+}
+   Make sure the there should be max 5 subkeys and should not be more than 1-2 lines.`
     prompt += candiatePrompt(promptVariables)
     prompt += languagePrompt()
     return prompt

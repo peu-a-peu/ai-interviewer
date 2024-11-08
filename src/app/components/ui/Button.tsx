@@ -10,8 +10,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClass = {
-    primary: 'bg-purple text-white',
-    secondary: 'border border-black bg-white text-black'
+    primary: 'bg-black text-white',
+    secondary: 'bg-gray-100 text-black'
 }
 const variantLoadingClass = {
     primary: 'bg-purple-200 text-white',
@@ -22,7 +22,7 @@ export default function Button(props: ButtonProps) {
     let { variant, isLoading, children, overrideClasses='',extraClasses, onClick,  ...rest } = props
     variant = variant || 'primary'
     const inverted = variant=='primary'
-    return <button onClick={isLoading? ()=>{}: onClick} className={clsx(overrideClasses||'rounded-xl px-4 py-2 text-sm', isLoading ? variantLoadingClass[variant]:"", variantClass[variant], extraClasses)} {...rest}>
+    return <button onClick={isLoading? ()=>{}: onClick} className={clsx(overrideClasses||'rounded-md py-5 px-4 text-sm font-semibold', isLoading ? variantLoadingClass[variant]:"", variantClass[variant], extraClasses)} {...rest}>
         {isLoading ? <div className="w-full flex justify-center"><Loader inverted={inverted} loading={true}/></div> : children}
     </button>
 }

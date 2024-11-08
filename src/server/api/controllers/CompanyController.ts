@@ -2,8 +2,8 @@ import CompanyService from "../services/CompanyService";
 
 class CompanyController {
 
-    static async searchCompany(search:string){
-        return await CompanyService.searchCompaniesByName(search, 20)
+    static async searchCompany(search:string, country:string){
+        return await CompanyService.searchCompaniesByName(search, 20, country)
     }
 
     static async getCompanyRoles(search:string){
