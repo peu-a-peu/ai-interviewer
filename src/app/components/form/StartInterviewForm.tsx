@@ -192,7 +192,7 @@ export default function StartInterviewForm() {
         </div>
         <div>
             <Label>{t(`Total job experience`)}</Label>
-            <Input value={formData.experience} error={formErrors?.experience} onChange={(e) => handleChange('experience', parseInt(e.target.value))} type="number" classes="w-16" placeholder={t(`Please enter total years of experience`)} tailText={t("years")} />
+            <Input error={formErrors?.experience} onChange={(e) => handleChange('experience', parseInt(e.target.value))} type="number" classes="w-16" placeholder={t(`Please enter total years of experience`)} tailText={t("years")} />
         </div>
         <div>
             <Label error={formErrors?.interview_type}>{t(`Interview type`)}</Label>
