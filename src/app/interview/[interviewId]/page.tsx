@@ -11,6 +11,7 @@ import { api } from '@/trpc/react';
 import { useTranslations } from 'next-intl';
 import Lottie from "react-lottie-player"
 import SpeakingAnimation from "../../lotties/speaking.json"
+import { useTranslations } from 'next-intl';
 
 export default function ViewPage({ params }: { params: { interviewId: string } }) {
     const t = useTranslations()
@@ -118,7 +119,7 @@ export default function ViewPage({ params }: { params: { interviewId: string } }
                     <div className={clsx(recordingStatus == 'inactive' ? 'mic-disabled' : "")}><Mic /></div>
                     <div onClick={() => openModal('close')}><Cross /></div>
                     <Modal isOpen={modals['close'].show} onClose={() => closeModal('close')}>
-                        <p className='text-sm text-center text-black font-medium'>{t(`Would you like to stop the interview?`)}</p>
+                        <p className='text-sm text-center text-black font-medium'>{t(`Would you like to stop the interview`)}?</p>
                         <div className="flex justify-between mt-5 gap-3 flex-wrap">
                             <Button isLoading={mutation.isPending} extraClasses='flex-grow' variant='primary' onClick={closeInterview}>{t(`Yes`)}</Button>
                             <Button extraClasses='flex-grow' variant='secondary' onClick={() => closeModal('close')}>{t(`No`)}</Button>

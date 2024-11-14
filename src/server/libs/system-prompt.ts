@@ -7,7 +7,6 @@ const PROMPT_KEYS: Record<string, string> = {
     pm: "PM_SYSTEM_PROMPT"
 }
 function candiatePrompt(promptVariables: InterviewInput) {
-    console.log({promptVariables})
     let prompt = ""
     const { experience, position, resume_summary, interview_type, name } = promptVariables
     prompt += " Here's candidate profile: "
@@ -31,18 +30,14 @@ function candiatePrompt(promptVariables: InterviewInput) {
     return prompt
 }
 
-export function languagePrompt() {
-    const language = env.AI_LANGUAGE || 'ENGLISH'
+export function languagePrompt(language:string) {
     return ` YOU ARE STRICTLY ADVISED TO KEEP CONVERSATION IN ${language} ONLY`
 }
 export async function getSystemPrompt(promptVariables: SystemPromptInput, key?: string) {
-
-    const { questions, created_at } = promptVariables
+    const { questions, created_at, language } = promptVariables
     let mappedKey = PROMPT_KEYS[key || "default"] || PROMPT_KEYS["default"] as string
     let prompt = await PromptService.getPromptByKey(mappedKey)
-    console.log({P1: prompt})
     prompt += candiatePrompt(promptVariables)
-    console.log({P2: prompt})
     if (questions?.length) {
         prompt += `\n These are the few questions you can ask to candidate. \n`
         prompt += questions.map((item, index) => `${index + 1}. ${item}`).join(`\n`)
@@ -54,8 +49,7 @@ export async function getSystemPrompt(promptVariables: SystemPromptInput, key?: 
     }
 
 
-    prompt += languagePrompt()
-    console.log({P3: prompt})
+    prompt += languagePrompt(language)
     return prompt
 }
 
@@ -72,7 +66,7 @@ export function evaluationPrompt(promptVariables: InterviewInput) {
 }
    Make sure the there should be max 5 subkeys and should not be more than 1-2 lines.`
     prompt += candiatePrompt(promptVariables)
-    prompt += languagePrompt()
+    prompt += languagePrompt(promptVariables.language)
     return prompt
 
 }

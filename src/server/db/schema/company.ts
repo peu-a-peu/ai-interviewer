@@ -11,7 +11,7 @@ export const company = pgTable("companies", {
   company_id: char("company_id", { length: 26 }).primaryKey().notNull(),
   company_name: varchar("company_name", { length: 255 }).notNull(),
   website: varchar("website", { length: 255 }),
-  logo: varchar("logo", { length: 255 }),
+  logo: varchar("logo", { length: 512 }),
   metadata:jsonb("metadata"),
   is_processed: boolean("is_processed").default(false),
   country: varchar("country",{length:10}),

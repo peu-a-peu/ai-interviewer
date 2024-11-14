@@ -17,8 +17,9 @@ export const interview = pgTable("interviews", {
   interview_type: varchar("interview_type", { length: 50 }),
   experience: integer("experience"),
   resume_summary: text("resume_summary"),
-  feedback: text("feedback"),
   category: varchar("category", { length: 15 }).default("default").notNull(),
+  language: varchar("language", {length: 20}).default("ENGLISH").notNull(),  
+  feedback: text("feedback"),
   created_at: timestamp('created_at').defaultNow().notNull(),
   ended_at: timestamp('ended_at')
 })

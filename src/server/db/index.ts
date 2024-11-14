@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import { env } from "@/env";
 
 /**
@@ -7,10 +7,23 @@ import { env } from "@/env";
  * update.
  */
 const globalForDb = globalThis as unknown as {
-  conn: postgres.Sql | undefined;
+  client: pg.Client | undefined;
 };
 
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
+// Create a new pg pg.Client instance
+const client = globalForDb.client ?? new pg.Client({
+  connectionString: env.DATABASE_URL,
+});
 
-export const db = drizzle(conn);
+// Connect to the database if not already connected
+if (!globalForDb.client) {
+  client.connect().catch((error) => {
+    console.error("Failed to connect to the database:", error);
+  });
+}
+
+// Cache the client connection in development
+if (env.NODE_ENV !== "production") globalForDb.client = client;
+
+// Initialize Drizzle with the pg Client
+export const db = drizzle(client);

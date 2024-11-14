@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 import InterviewController from "../controllers/InterviewController";
 import { TRPCError } from "@trpc/server";
+import { getLanguageFromLocale } from "@/server/constants/constant";
 export const interviewRouter = createTRPCRouter({
 
   createInterview: publicProcedure
@@ -13,10 +14,10 @@ export const interviewRouter = createTRPCRouter({
       interview_type: z.string().optional(),
       experience: z.number().optional(),
       resume_summary: z.string().optional(),
-      category: z.string().optional()
+      category: z.string().optional(),
     }).strict())
     .query(async ({ input, ctx }) => {
-      const res = await InterviewController.createInterview({ interview_id: "", ...input })
+      const res = await InterviewController.createInterview({ interview_id: "", ...input, language: getLanguageFromLocale(ctx.locale) })
       return res?.interview_id
     }),
 

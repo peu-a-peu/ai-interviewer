@@ -21,7 +21,7 @@ export default async function FeedbackPage({ params }: { params: { interviewId: 
             <section className="relative max-w-xl mx-auto py-12 px-3 flex flex-col justify-center items-center">
                 <Image alt="feedback" width={120} height={120} src={"/pngs/feedback.png"} />
                 <h1 className="text-3xl leading-relaxed mt-3 text-center">{capitalize(data?.candidate_name || "")} <br />{t(`Mock interview results`)}</h1>
-                <p className="mt-3 text-center">{t(`The interview has ended. Check out your strengths and points of improvement!`)}</p>
+                <p className="mt-3 text-center">{t(`The interview has ended`)}. {t(`Check out your strengths and points of improvement`)}</p>
                 <div className="flex flex-col">
                     {Object.keys(summary).map((key) => {
                         const subKeys = Object.keys(summary[key])

@@ -8,6 +8,7 @@ export interface InterviewInput{
     interview_type?:string;
     resume_summary?:string;
     position?:string;
+    language:string;
 }
 export interface SystemPromptInput extends InterviewInput {
     questions?:string[];

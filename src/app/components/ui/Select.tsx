@@ -13,7 +13,8 @@ interface SelectProps<T> {
     selected?: Option;
     disabled?:boolean;
     infoMsg?:string;
-    error?:string
+    error?:string;
+    allowSearchToBeValue?:boolean;
 }
 
 export interface Option {
@@ -23,7 +24,7 @@ export interface Option {
 }
 
 export default function Select<T>(props: SelectProps<T>) {
-    const { searchValue, placeholder = "",  onOptionClick, selected, options,infoMsg, disabled=false,error } = props;
+    const { searchValue, placeholder = "",  onOptionClick, selected, options,infoMsg, disabled=false,error,allowSearchToBeValue } = props;
     const [search, setSearch] = useState<string>(searchValue || '')
     const [open, setOpen] = useState(false)
     const [selection, setSelection] = useState<Option | undefined>(selected)
@@ -44,17 +45,18 @@ export default function Select<T>(props: SelectProps<T>) {
     }
 
     const filterAndSortItems = (items: Option[], searchTerm: string) => {
-        return items.sort((a, b) => {
-          const aMatches = a.label.toLowerCase().includes(searchTerm.toLowerCase());
-          const bMatches = b.label.toLowerCase().includes(searchTerm.toLowerCase());
-      
-          if (aMatches && !bMatches) return -1; 
-          if (!aMatches && bMatches) return 1; 
-          return 0;
+        return items.filter((item) => {
+          return item.label.toLowerCase().includes(searchTerm.toLowerCase());
         });
       };
-
-    let FilteredOptions = filterAndSortItems(options,search)
+      let FilteredOptions = filterAndSortItems(options,search)
+      if(allowSearchToBeValue && !FilteredOptions.length){
+        FilteredOptions.push({
+            id:search,
+            value:search,
+            label:search
+        })
+      }
   
     return <>
         <div className= {clsx(disabled ? "bg-gray-100 border-gray-400":"","border border-gray-300 px-4 py-3 rounded-md text-lg font-semibold relative")}>
