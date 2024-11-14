@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Client } from "pg";
+import pg from "pg";
 import { env } from "@/env";
 
 /**
@@ -7,11 +7,11 @@ import { env } from "@/env";
  * update.
  */
 const globalForDb = globalThis as unknown as {
-  client: Client | undefined;
+  client: pg.Client | undefined;
 };
 
-// Create a new pg Client instance
-const client = globalForDb.client ?? new Client({
+// Create a new pg pg.Client instance
+const client = globalForDb.client ?? new pg.Client({
   connectionString: env.DATABASE_URL,
 });
 

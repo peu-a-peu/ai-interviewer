@@ -11,14 +11,36 @@ import clsx from "clsx";
 import Select from "../ui/Select";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { INTERVIEW_TYPES, POSITION_TYPES } from "@/app/constants/values";
-import { getUserLocale } from "@/app/services/locale";
+import { DEFAULT_COMPANY_IMAGE, INTERVIEW_TYPES } from "@/app/constants/values";
 
 
 
 
 export default function StartInterviewForm() {
     const t = useTranslations()
+    const ROLES = {
+      [t("Administrative Assistant")]: "administrative_assistant",
+      [t("Back-End Engineer")]: "back_end_engineer",
+      [t("Business Analyst")]: "business_analyst",
+      [t("Business Development Manager")]: "business_development_manager",
+      [t("Customer Support Specialist")]: "customer_support_specialist",
+      [t("Finance Manager")]: "finance_manager",
+      [t("Front-End Engineer")]: "front_end_engineer",
+      [t("Graphic Designer")]: "graphic_designer",
+      [t("Human Resources Specialist")]: "human_resources_specialist",
+      [t("Marketing Specialist")]: "marketing_specialist",
+      [t("Product Manager")]: "product_manager",
+      [t("Quality Assurance (QA)")]: "quality_assurance",
+      [t("Research and Development (R&D)")]: "research_and_development",
+      [t("Sales & Marketing")]: "sales_and_marketing",
+      [t("Sales Representative")]: "sales_representative",
+      [t("Software Engineer")]: "software_engineer",
+      [t("Product Designer")]: "product_designer",
+      }
+
+      const roleKeys = Object.keys(ROLES)
+      const roleValues = Object.values(ROLES)
+      const roleOptions:Option[] = roleKeys.map((item,index)=>({id:roleValues[index]!, value:roleValues[index], label:item}))
     const formSchema = z.object({
         candidate_name: z.string().min(1, { message: t("Name is required") }),
         company_id: z.string().min(1, { message: t("Company is required") }),
@@ -46,7 +68,6 @@ export default function StartInterviewForm() {
     const [selected, setSelected] = useState<Option>()
     const [formData, setFormData] = useState<FormData>(initialState)
     const [formErrors, setFormErrors] = useState<Record<string, string>>()
-    const [options, setOptions] = useState<Option[]>([])
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState<File>()
     const category = pathname.split("/")?.[1] || "default"
@@ -67,14 +88,6 @@ export default function StartInterviewForm() {
             t("Executive Interview")
         ]
     }
-
-    useEffect(()=>{
-        if( locale=='en'){
-            setOptions(POSITION_TYPES["pm"]!.map((item)=>({id:item,value:item,label:item})))
-        }
-    },[locale])
-
-
 
 
     async function handleSearch(query: string): Promise<Option[]> {
@@ -137,14 +150,6 @@ export default function StartInterviewForm() {
         setFormErrors((prev) => ({ ...prev, [key]: '' }))
     }
 
-    async function getCompanyRoles(companyId: string) {
-        try {
-            let data = await apiUtil.company.getAllCompanyRoles.fetch({ companyId })
-            setOptions(data.map((key) => ({ id: key, value: key, label: key })))
-        } catch (err) {
-            console.log(err)
-        }
-    }
 
     function selectFile(e: any) {
         const file = e.target.files?.[0]
@@ -167,10 +172,6 @@ export default function StartInterviewForm() {
         return res.text
     }
 
-    useEffect(() => {
-        selected && locale!=='en' && getCompanyRoles(selected.value)
-    }, [selected])
-
     return <form className="max-w-xl flex flex-col gap-8 mx-auto" onSubmit={loading ? () => { } : handleSubmit}>
         <div>
             <Label>{t('Name')}</Label>
@@ -184,11 +185,12 @@ export default function StartInterviewForm() {
                 selected={selected}
                 onSearch={handleSearch}
                 onOptionClick={(option) => { setSelected(option); handleChange('company_id', option.value) }}
+                onErrorImage={DEFAULT_COMPANY_IMAGE}
             />
         </div>
         <div>
             <Label>{t(`Job title`)}</Label>
-            <Select error={formErrors?.position} placeholder={t(`Search job title`)} options={options} onOptionClick={(option) => { handleChange('position', option.value) }} />
+            <Select allowSearchToBeValue error={formErrors?.position} placeholder={t(`Search job title`)} options={roleOptions} onOptionClick={(option) => { handleChange('position', option.value) }} />
         </div>
         <div>
             <Label>{t(`Total job experience`)}</Label>

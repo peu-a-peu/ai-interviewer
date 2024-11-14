@@ -13,6 +13,7 @@ interface SearchWithSelectProps<T> {
     debounceDelay?: number
     selected?: Option
     error?: string
+    onErrorImage?:string
 }
 
 export interface Option {
@@ -23,7 +24,7 @@ export interface Option {
 }
 
 export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
-    const { searchValue, placeholder = "", onSearch, onOptionClick, debounceDelay = 300, selected, error } = props;
+    const { searchValue, placeholder = "", onSearch, onOptionClick, debounceDelay = 300, selected, error, onErrorImage } = props;
     const [search, setSearch] = useState<string>(searchValue || '')
     const [options, setOptions] = useState<Option[]>([])
     const [open, setOpen] = useState(false)
@@ -83,9 +84,11 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
                 {options.map((option) => <>
                     <p
                         key={option.id}
-                        className={clsx("rounded-md py-3 px-4 flex gap-4", selection?.value === option.value ? "!bg-black text-white" : "hover:bg-gray-100 hover:text-black")}
+                        className={clsx("rounded-md py-3 px-4 flex items-center gap-4", selection?.value === option.value ? "!bg-black text-white" : "hover:bg-gray-100 hover:text-black")}
                         onClick={() => { handleOptionClick(option) }}>
-                        {option.logo && <img className="h-8 shrink-0" src={option.logo} />}
+                        <div className="max-w-20 basis-3/12 flex justify-center">
+                        {option.logo && <img className="h-10 shrink-0" src={option.logo} onError={(e)=>{e.currentTarget.src = onErrorImage || ''}}/>}
+                        </div>
                         {option.label}
                     </p>
                 </>
