@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "../ui/Button";
 import Chip from "../ui/Chip";
 import Input from "../ui/Input";
@@ -9,9 +9,9 @@ import { api } from "@/trpc/react";
 import { z } from "zod";
 import clsx from "clsx";
 import Select from "../ui/Select";
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { DEFAULT_COMPANY_IMAGE, INTERVIEW_TYPES } from "@/app/constants/values";
+import {  useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
 
 
 
@@ -19,28 +19,29 @@ import { DEFAULT_COMPANY_IMAGE, INTERVIEW_TYPES } from "@/app/constants/values";
 export default function StartInterviewForm() {
     const t = useTranslations()
     const ROLES = {
-      [t("Administrative Assistant")]: "administrative_assistant",
-      [t("Back-End Engineer")]: "back_end_engineer",
-      [t("Business Analyst")]: "business_analyst",
-      [t("Business Development Manager")]: "business_development_manager",
-      [t("Customer Support Specialist")]: "customer_support_specialist",
-      [t("Finance Manager")]: "finance_manager",
-      [t("Front-End Engineer")]: "front_end_engineer",
-      [t("Graphic Designer")]: "graphic_designer",
-      [t("Human Resources Specialist")]: "human_resources_specialist",
-      [t("Marketing Specialist")]: "marketing_specialist",
-      [t("Product Manager")]: "product_manager",
-      [t("Quality Assurance (QA)")]: "quality_assurance",
-      [t("Research and Development (R&D)")]: "research_and_development",
-      [t("Sales & Marketing")]: "sales_and_marketing",
-      [t("Sales Representative")]: "sales_representative",
-      [t("Software Engineer")]: "software_engineer",
-      [t("Product Designer")]: "product_designer",
-      }
+        [t("Administrative Assistant")]: "administrative_assistant",
+        [t("Back-End Engineer")]: "back_end_engineer",
+        [t("Business Analyst")]: "business_analyst",
+        [t("Business Development Manager")]: "business_development_manager",
+        [t("Customer Support Specialist")]: "customer_support_specialist",
+        [t("Finance Manager")]: "finance_manager",
+        [t("Front-End Engineer")]: "front_end_engineer",
+        [t("Graphic Designer")]: "graphic_designer",
+        [t("Human Resources Specialist")]: "human_resources_specialist",
+        [t("Marketing Specialist")]: "marketing_specialist",
+        [t("Product Manager")]: "product_manager",
+        [t("Quality Assurance (QA)")]: "quality_assurance",
+        [t("Research and Development (R&D)")]: "research_and_development",
+        [t("Sales & Marketing")]: "sales_and_marketing",
+        [t("Sales Representative")]: "sales_representative",
+        [t("Software Engineer")]: "software_engineer",
+        [t("Product Designer")]: "product_designer",
+        [t("Full-Stack Engineer")]: "full_stack_engineer"
+    }
 
-      const roleKeys = Object.keys(ROLES)
-      const roleValues = Object.values(ROLES)
-      const roleOptions:Option[] = roleKeys.map((item,index)=>({id:roleValues[index]!, value:roleValues[index], label:item}))
+    const roleKeys = Object.keys(ROLES)
+    const roleValues = Object.values(ROLES)
+    const roleOptions: Option[] = roleKeys.map((item, index) => ({ id: roleValues[index]!, value: roleValues[index], label: item }))
     const formSchema = z.object({
         candidate_name: z.string().min(1, { message: t("Name is required") }),
         company_id: z.string().min(1, { message: t("Company is required") }),
@@ -62,7 +63,6 @@ export default function StartInterviewForm() {
         resume_summary: '',
         position: ''
     }
-    const pathname = usePathname()
     const apiUtil = api.useUtils()
     const router = useRouter()
     const [selected, setSelected] = useState<Option>()
@@ -70,24 +70,13 @@ export default function StartInterviewForm() {
     const [formErrors, setFormErrors] = useState<Record<string, string>>()
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState<File>()
-    const category = pathname.split("/")?.[1] || "default"
-    const locale = useLocale()
 
-    let interviewTypes:string[] = []
-    let interviewTypesText:string[] = []
-    if (INTERVIEW_TYPES[category] || locale=='en') {
-        interviewTypes = INTERVIEW_TYPES["pm"]!
-        interviewTypesText = INTERVIEW_TYPES["pm"]!
-    } else {
-        interviewTypes = ['인성면접', 'PT면접', '토론면접', '일반면접', '임원면접']
-        interviewTypesText = [
-            t("Personality Interview"),
-            t("Presentation Interview"),
-            t("Discussion Interview"),
-            t("General Interview"),
-            t("Executive Interview")
-        ]
-    }
+
+    let interviewTypes = ['capability_interview', 'behavioral_interview']
+    let interviewTypesText = [
+        t("Capability Interview"),
+        t("Behavioral Interview"),
+    ]
 
 
     async function handleSearch(query: string): Promise<Option[]> {
@@ -124,7 +113,6 @@ export default function StartInterviewForm() {
             setLoading(true)
             let data = await apiUtil.interview.createInterview.fetch({
                 ...formData,
-                category
             })
             router.push(`/interview/${data}`)
         } catch (err) {

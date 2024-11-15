@@ -2,8 +2,8 @@ import PromptRepository from "../repostitory/PromptRepository"
 
 class PromptService{
 
-    static async getPromptByKey(key:string){
-        return await PromptRepository.getPromptById(key)
+    static async getPromptByPosition(position:string, interviewType?:string){
+        return await PromptRepository.getPromptByPosition(position, interviewType)
     }
 }
 

@@ -11,7 +11,6 @@ export interface InterviewInput{
     language:string;
 }
 export interface SystemPromptInput extends InterviewInput {
-    questions?:string[];
     created_at?:Date;
 }
 

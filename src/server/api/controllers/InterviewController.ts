@@ -2,7 +2,6 @@ import AiFactory from "../Factory/AiFactory";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import InterviewService from "../services/InterviewService";
 import { NewInterview } from "@/server/interfaces/drizzle";
-import QuestionsService from "../services/QuestionsService";
 import CustomError from "@/app/components/utils/CustomError";
 import { evaluationPrompt, getSystemPrompt } from "@/server/libs/system-prompt";
 import { EvaluationResponse, SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
@@ -20,22 +19,19 @@ class InterviewController {
         if (!currentInterview || currentInterview.ended_at) {
             throw new CustomError("Interview not found", 404)
         }
-        const [conversations, questions] = await Promise.all([
-            InterviewService.getInterviewConversations(interviewId),
-            QuestionsService.getQuestionsForCompany(currentInterview)
-        ])
+        const conversations = await  InterviewService.getInterviewConversations(interviewId)
+           
 
-        const { experience, interview_type, resume_summary, position,created_at, category, candidate_name, language } = currentInterview
+        const { experience, interview_type, resume_summary, position,created_at, candidate_name, language } = currentInterview
         const prompt = await getSystemPrompt({
             name: candidate_name,
             experience,
             interview_type,
             resume_summary,
             position,
-            questions,
             created_at,
             language
-        } as SystemPromptInput, category)
+        } as SystemPromptInput)
 
         let lastAns = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
