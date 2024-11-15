@@ -58,9 +58,9 @@ class InterviewController {
             role: "system"
         })
 
-        const isOver = aiResponse.includes("%EXIT%")
+        const isOver = aiResponse.includes("<<END_INTERVIEW>>")
         if (isOver) {
-            aiResponse = aiResponse.replace('%EXIT%', '')
+            aiResponse = aiResponse.replace('<<END_INTERVIEW>>', '')
             await InterviewService.closeInterview(interviewId)
         }
 
