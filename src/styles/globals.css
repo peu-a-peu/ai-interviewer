@@ -3,146 +3,161 @@
 @tailwind utilities;
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 @layer base {
-    /* Apply font styles based on lang attribute directly */
-    html[lang="en"] {
-      @apply font-english;
-    }
-  
-    html[lang="ko"] {
-      @apply font-korean;
-      letter-spacing: -0.01em;
-    }
-  
-    /* Add other languages as needed */
-  } 
-  
+  /* Apply font styles based on lang attribute directly */
+  html[lang="en"] {
+    @apply font-english;
+  }
+
+  html[lang="ko"] {
+    @apply font-korean;
+    letter-spacing: -0.01em;
+  }
+
+  /* Add other languages as needed */
+}
 
 body {
-    @apply bg-white;
+  @apply bg-white;
 }
 
 input {
-    @apply text-gray-950;
-  }
-  
-  /* Placeholder text color */
-  input::placeholder {
-    @apply text-gray-400;
-  }
+  @apply text-gray-950;
+}
+
+/* Placeholder text color */
+input::placeholder {
+  @apply text-gray-400;
+}
 
 .main-gradient {
-    background: linear-gradient(180deg, #E6F3FF 0%, #FFFFFF 100%);
-    background-size: 100% 600px;
-    background-repeat: no-repeat;
+  background: linear-gradient(180deg, #e6f3ff 0%, #ffffff 100%);
+  background-size: 100% 600px;
+  background-repeat: no-repeat;
 }
 
 /* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-    width: 8px;
-    /* Width of the scrollbar */
-    height: 8px;
-    /* Height of the scrollbar */
+  width: 8px;
+  /* Width of the scrollbar */
+  height: 8px;
+  /* Height of the scrollbar */
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    /* Color of the track (the background area) */
-    border-radius: 10px;
-    /* Optional: Rounded corners */
+  background: #f1f1f1;
+  /* Color of the track (the background area) */
+  border-radius: 10px;
+  /* Optional: Rounded corners */
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #c4c4c4;
-    /* Color of the scroll thumb (the draggable part) */
-    border-radius: 10px;
-    /* Optional: Rounded corners */
+  background: #c4c4c4;
+  /* Color of the scroll thumb (the draggable part) */
+  border-radius: 10px;
+  /* Optional: Rounded corners */
 }
 
 .dot {
-    animation: growNshrink ease-in-out 1.2s infinite;
-    animation-delay: calc((var(--i) * 150ms));
+  animation: growNshrink ease-in-out 1.2s infinite;
+  animation-delay: calc((var(--i) * 150ms));
 }
 
-
 @keyframes growNshrink {
+  0%,
+  100% {
+    height: 48px;
+  }
 
-    0%,
-    100% {
-        height: 48px;
-    }
-
-    50% {
-        height: 96px;
-    }
+  50% {
+    height: 96px;
+  }
 }
 
 .assistant-speak {
-    animation: pulse 1.5s infinite;
+  animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
 
-    50% {
-        transform: scale(1.2);
-        opacity: 0.85;
-    }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.85;
+  }
 
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Hide the default number input arrows in WebKit browsers (Chrome, Safari) */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    /* Remove the arrows */
-    margin: 0;
-    /* Reset margin */
+  -webkit-appearance: none;
+  /* Remove the arrows */
+  margin: 0;
+  /* Reset margin */
 }
 
 /* Hide the default number input arrows in Firefox */
 input[type="number"] {
-    -moz-appearance: textfield;
-    /* Change the appearance */
+  -moz-appearance: textfield;
+  /* Change the appearance */
 }
 
-
 .loader {
-    animation: rotate linear 1s infinite;
+  animation: rotate linear 1s infinite;
 }
 
 @keyframes rotate {
-    100% {
-        transform: rotate(360deg);
-    }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .mic-disabled {
-    background-color: red;
-    position: relative;
-    border-radius: 100%;
-    overflow: hidden;
+  background-color: red;
+  position: relative;
+  border-radius: 100%;
+  overflow: hidden;
+  opacity: 40%;
 }
 
 .mic-disabled::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
-    width: 4px;
-    height: 100%;
-    background-color: #ec1f5d;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 4px;
+  height: 100%;
+  /* background-color: #ec1f5d; */
+}
+
+.mic-disabled-user {
+  background-color: red;
+  position: relative;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+.mic-disabled-user::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 4px;
+  height: 100%;
+  background-color: #ec1f5d;
 }
