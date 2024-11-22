@@ -145,7 +145,7 @@ export default function ViewPage({
             {t(`You can start speaking now`)}
           </p>
         )}
-        <div className="absolute left-0 px-4 bottom-4 flex justify-between w-full">
+        <div className="absolute left-0 px-4 bottom-8 flex justify-between w-full">
           <div
             className={clsx(
               recordingStatus === "inactive"
