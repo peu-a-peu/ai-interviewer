@@ -12,6 +12,7 @@ import Select from "../ui/Select";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
+import ConfirmModal from "./ConfirmModal";
 
 export default function StartInterviewForm() {
   const t = useTranslations();
@@ -77,6 +78,7 @@ export default function StartInterviewForm() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>();
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File>();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   let interviewTypes = ["capability_interview", "behavioral_interview"];
   let interviewTypesText = [
@@ -123,6 +125,16 @@ export default function StartInterviewForm() {
 
   async function createInterview(formData: FormData) {
     try {
+      setShowConfirmModal(true);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleModalConfirm = async () => {
+    try {
       setLoading(true);
       let data = await apiUtil.interview.createInterview.fetch({
         ...formData,
@@ -132,8 +144,10 @@ export default function StartInterviewForm() {
       console.log(err);
     } finally {
       setLoading(false);
+      setShowConfirmModal(false);
     }
-  }
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const data: FormData | null = validate();
@@ -176,99 +190,112 @@ export default function StartInterviewForm() {
   };
 
   return (
-    <form
-      className="max-w-xl flex flex-col gap-8 mx-auto"
-      onSubmit={loading ? () => {} : handleSubmit}
-    >
-      <div>
-        <Label>{t("Name")}</Label>
-        <Input
-          value={formData.candidate_name}
-          error={formErrors?.candidate_name}
-          onChange={(e) => handleChange("candidate_name", e.target.value)}
-          placeholder={t(`Please enter your name`)}
-        />
-      </div>
-      <div>
-        <Label>{t(`Company`)}</Label>
-        <SearchWithSelect
-          error={formErrors?.company_id}
-          placeholder={t("Please enter the company name here")}
-          selected={selected}
-          onSearch={handleSearch}
-          onOptionClick={(option) => {
-            setSelected(option);
-            handleChange("company_id", option.value);
-          }}
-          onErrorImage={DEFAULT_COMPANY_IMAGE}
-        />
-      </div>
-      <div>
-        <Label>{t(`Job title`)}</Label>
-        <Select
-          allowSearchToBeValue
-          error={formErrors?.position}
-          placeholder={t(`Search job title`)}
-          options={roleOptions}
-          onOptionClick={(option) => {
-            handleChange("position", option.value);
-          }}
-        />
-      </div>
-      <div>
-        <Label>{t(`Total job experience`)}</Label>
-        <Input
-          error={formErrors?.experience}
-          onChange={(e) => handleChange("experience", parseInt(e.target.value))}
-          type="number"
-          classes="w-16 pr-14 "
-          placeholder={t(`Please enter total years of experience`)}
-          tailText={t("years")}
-        />
-      </div>
-      <div>
-        <Label error={formErrors?.interview_type}>{t(`Interview type`)}</Label>
-        <div className="flex gap-2.5 flex-wrap">
-          {interviewTypes.map((item, index) => (
-            <Chip
-              extraClass={clsx(
-                "cursor-pointer",
-                formData.interview_type === item ? "!bg-black text-white" : ""
-              )}
-              onClick={() => handleChange("interview_type", item)}
-              key={index}
-            >
-              {interviewTypesText[index]}
-            </Chip>
-          ))}
+    <>
+      <form
+        className="max-w-xl flex flex-col gap-8 mx-auto"
+        onSubmit={loading ? () => {} : handleSubmit}
+      >
+        <div>
+          <Label>{t("Name")}</Label>
+          <Input
+            value={formData.candidate_name}
+            error={formErrors?.candidate_name}
+            onChange={(e) => handleChange("candidate_name", e.target.value)}
+            placeholder={t(`Please enter your name`)}
+          />
         </div>
-      </div>
-      <div>
-        <Label>
-          {t(`Upload Resume`)}{" "}
-          <span className="text-gray-400">({t(`Optional`)})</span>
-        </Label>
-        <p className="text-gray-500 text-sm -mt-2 mb-4">
-          {t(`The interview quality will improve if you upload your resume`)}.
-        </p>
-        <label
-          className="rounded-md p-4 border border-gray-300 inline-block w-full text-center font-semibold text-gray-950"
-          htmlFor={"fileUpload"}
-        >
-          {file?.name || t(`Upload Resume`)}
-        </label>
-        <Input
-          error={formErrors?.resume_summary}
-          onChange={selectFile}
-          type="file"
-          classes="hidden"
-          id="fileUpload"
-          accept="application/pdf"
-        />
-      </div>
-      <Button isLoading={loading}>
-        {t(`Experience a mock interview for free once`)}
-      </Button>
-    </form>
+        <div>
+          <Label>{t(`Company`)}</Label>
+          <SearchWithSelect
+            error={formErrors?.company_id}
+            placeholder={t("Please enter the company name here")}
+            selected={selected}
+            onSearch={handleSearch}
+            onOptionClick={(option) => {
+              setSelected(option);
+              handleChange("company_id", option.value);
+            }}
+            onErrorImage={DEFAULT_COMPANY_IMAGE}
+          />
+        </div>
+        <div>
+          <Label>{t(`Job title`)}</Label>
+          <Select
+            allowSearchToBeValue
+            error={formErrors?.position}
+            placeholder={t(`Search job title`)}
+            options={roleOptions}
+            onOptionClick={(option) => {
+              handleChange("position", option.value);
+            }}
+          />
+        </div>
+        <div>
+          <Label>{t(`Total job experience`)}</Label>
+          <Input
+            error={formErrors?.experience}
+            onChange={(e) =>
+              handleChange("experience", parseInt(e.target.value))
+            }
+            type="number"
+            classes="w-16 pr-14 "
+            placeholder={t(`Please enter total years of experience`)}
+            tailText={t("years")}
+          />
+        </div>
+        <div>
+          <Label error={formErrors?.interview_type}>
+            {t(`Interview type`)}
+          </Label>
+          <div className="flex gap-2.5 flex-wrap">
+            {interviewTypes.map((item, index) => (
+              <Chip
+                extraClass={clsx(
+                  "cursor-pointer",
+                  formData.interview_type === item ? "!bg-black text-white" : ""
+                )}
+                onClick={() => handleChange("interview_type", item)}
+                key={index}
+              >
+                {interviewTypesText[index]}
+              </Chip>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Label>
+            {t(`Upload Resume`)}{" "}
+            <span className="text-gray-400">({t(`Optional`)})</span>
+          </Label>
+          <p className="text-gray-500 text-sm -mt-2 mb-4">
+            {t(`The interview quality will improve if you upload your resume`)}.
+          </p>
+          <label
+            className="rounded-md p-4 border border-gray-300 inline-block w-full text-center font-semibold text-gray-950"
+            htmlFor={"fileUpload"}
+          >
+            {file?.name || t(`Upload Resume`)}
+          </label>
+          <Input
+            error={formErrors?.resume_summary}
+            onChange={selectFile}
+            type="file"
+            classes="hidden"
+            id="fileUpload"
+            accept="application/pdf"
+          />
+        </div>
+        <Button isLoading={loading}>
+          {t(`Experience a mock interview for free once`)}
+        </Button>
+      </form>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleModalConfirm}
+        userEmail={formData.candidate_name}
+      />
+    </>
   );
 }

@@ -11,7 +11,7 @@ import { companyRouter } from "./routers/companies";
 export const appRouter = createTRPCRouter({
   test: testRouter,
   interview: interviewRouter,
-  company: companyRouter
+  company: companyRouter,
 });
 
 // export type definition of API

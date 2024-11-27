@@ -22,7 +22,9 @@ export default function VerifyEmail() {
 
     const verifyEmail = async () => {
       try {
+        debugger;
         const response = await fetch(`/api/verify-email?token=${token}`);
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -36,9 +38,8 @@ export default function VerifyEmail() {
 
         setVerificationStatus("success");
 
-        // Redirect after a short delay
         setTimeout(() => {
-          router.push("/");
+          window.location.href = "/";
         }, 2000);
       } catch (err) {
         setVerificationStatus("error");

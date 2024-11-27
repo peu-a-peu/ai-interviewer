@@ -5,6 +5,7 @@ import { ulid } from "ulidx";
 import { company } from "./company";
 import { question } from "./question";
 import { verificationTokens } from "./verificationToken";
+import { users } from "./user";
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
  * database instance for multiple projects.
@@ -106,3 +107,4 @@ export { interview } from "./interview";
 export { conversation } from "./conversation";
 export { prompt } from "./prompt";
 export { verificationTokens } from "./verificationToken";
+export { users } from "./user";

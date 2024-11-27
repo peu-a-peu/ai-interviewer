@@ -1,19 +1,10 @@
 {
-  "version": "5",
-  "dialect": "pg",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": "1710000000000",
-      "tag": "0000_verification_tokens",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
       "version": "7",
-      "when": 1732276778912,
-      "tag": "0001_tough_thunderbolt",
+      "when": 1732628870844,
+      "tag": "0000_worthless_korath",
       "breakpoints": true
     }
   ]
