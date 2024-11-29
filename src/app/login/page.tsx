@@ -37,9 +37,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setIsLoadingGoogle(true);
+
     try {
       await sendVerificationMutation.mutateAsync({
         email: formData.email,
+        user: process.env.NEXT_PUBLIC_EMAIL_USER ?? "",
+        pass: process.env.NEXT_PUBLIC_EMAIL_PASSWORD ?? "",
+        redirectUrl: process.env.NEXT_PUBLIC_APP_URL ?? "",
       });
     } catch (err) {
       // Error handling is done in onError callback
