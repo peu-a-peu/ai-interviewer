@@ -1,5 +1,15 @@
 {
   "git": {
     "deploymentEnabled": false
+  },
+  "env": {
+    "EMAIL_USER": "@email_user",
+    "EMAIL_PASSWORD": "@email_password"
+  },
+  "build": {
+    "env": {
+      "EMAIL_USER": "@email_user",
+      "EMAIL_PASSWORD": "@email_password"
+    }
   }
 }

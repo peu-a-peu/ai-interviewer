@@ -1,5 +1,5 @@
-import {config} from "dotenv"
-config()
+import { config } from "dotenv";
+config();
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
@@ -11,7 +11,7 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     OPENAI_API_KEY: z.string(),
-    OPENAI_CHAT_MODEL:z.string(),
+    OPENAI_CHAT_MODEL: z.string(),
     OPENAI_TTS_MODEL: z.string(),
     OPENAI_STT_MODEL: z.string(),
     AI_LANGUAGE: z.string(),
@@ -31,6 +31,11 @@ export const env = createEnv({
     ),
     DISCORD_CLIENT_ID: z.string(),
     DISCORD_CLIENT_SECRET: z.string(),
+    EMAIL_USER: z.string(),
+    EMAIL_PASSWORD: z.string(),
+    // @ts-ignore
+    NEXT_PUBLIC_APP_URL: z.string().url(),
+    TOSS_PAYMENTS_SECRET_KEY: z.string(),
   },
 
   /**
@@ -40,6 +45,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY: z.string(),
   },
 
   /**
@@ -53,11 +59,16 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
-    OPENAI_API_KEY:process.env.OPENAI_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_CHAT_MODEL: process.env.OPENAI_CHAT_MODEL,
     OPENAI_TTS_MODEL: process.env.OPENAI_TTS_MODEL,
     OPENAI_STT_MODEL: process.env.OPENAI_STT_MODEL,
-    AI_LANGUAGE: process.env.AI_LANGUAGE
+    AI_LANGUAGE: process.env.AI_LANGUAGE,
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
+    TOSS_PAYMENTS_SECRET_KEY: process.env.TOSS_PAYMENTS_SECRET_KEY,
+    NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY:
+      process.env.NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
