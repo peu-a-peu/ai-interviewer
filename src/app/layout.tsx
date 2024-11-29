@@ -35,10 +35,12 @@ export default async function RootLayout({
         )}
       </head>
       <body className="main-gradient">
-        <Navbar />
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-        </NextIntlClientProvider>
+        <TRPCReactProvider>
+          <NextIntlClientProvider messages={messages} locale={locale}>
+            <Navbar />
+            {children}
+          </NextIntlClientProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );

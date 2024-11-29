@@ -7,11 +7,10 @@ export async function POST(request: Request) {
   try {
     const { email } = await request.json();
 
-    // Find user in database
     const user = await db
       .select()
       .from(verificationTokens)
-      .where(eq(verificationTokens.email, email))
+      .where(eq(verificationTokens.email, email as string))
       .limit(1)
       .then((rows) => rows[0]);
 
@@ -20,8 +19,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      status: user.status,
-      email: user.email,
+      // status: user.status ?? null,
+      email: user.email ?? "",
     });
   } catch (error) {
     console.error("Error checking user status:", error);

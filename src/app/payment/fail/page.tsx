@@ -5,9 +5,6 @@ const PaymentFail = () => {
   const [params, setParams] = useState({ code: "", message: "", orderId: "" });
 
   useEffect(() => {
-    debugger;
-    console.log("params", params);
-
     const searchParams = new URLSearchParams(window.location.search);
     setParams({
       code: searchParams.get("code") || "",
@@ -16,16 +13,8 @@ const PaymentFail = () => {
     });
   }, []);
 
-  console.log("params", params);
-  console.log(
-    "decodeURIComponent(params.message)",
-    decodeURIComponent(params.message)
-  );
-  console.log("code", params.code);
-  console.log("orderId", params.orderId);
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen ">
       <h1 className="text-2xl font-bold text-red-600 mb-4">Payment Failed</h1>
       {params.code && <p className="mb-2">Error Code: {params.code}</p>}
       {params.message && (

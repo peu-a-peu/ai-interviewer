@@ -15,6 +15,7 @@ export default function ConfirmModal({
   onConfirm,
 }: ConfirmModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations();
 
   if (!isOpen) return null;
 
@@ -57,19 +58,19 @@ export default function ConfirmModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h3 className="text-lg font-semibold mb-4 text-center">
-          {"One voucher is used."}
+          {t("One voucher is used")}
           <br />
-          {"Would you like to conduct a mock interview?"}
+          {t("Would you like to conduct a mock interview?")}
         </h3>
         <div className="flex gap-4 justify-center">
           <Button onClick={onClose} variant="secondary">
-            {"No"}
+            {t("cancel")}
           </Button>
           <Button onClick={handleConfirm} disabled={isLoading}>
             {isLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-t-4 border-b-4 border-blue-500 mx-2"></div>
             ) : (
-              "Yes"
+              t("Interview progress")
             )}
           </Button>
         </div>

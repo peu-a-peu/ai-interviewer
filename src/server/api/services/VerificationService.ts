@@ -4,8 +4,10 @@ import { verificationTokens } from "@/server/db/schema/verificationToken";
 import { eq } from "drizzle-orm";
 
 class VerificationService {
+  static sendVerification(email: string) {
+    throw new Error("Method not implemented.");
+  }
   static async createVerificationToken(email: string, token: string) {
-    console.log("1");
     const expires = new Date();
     expires.setHours(expires.getHours() + 24); // Token expires in 24 hours
 
@@ -15,8 +17,6 @@ class VerificationService {
       .from(verificationTokens)
       .where(eq(verificationTokens.email, email))
       .limit(1);
-    console.log("2");
-    console.log(existingToken);
 
     if (existingToken.length > 0) {
       // Delete existing token first
@@ -24,7 +24,6 @@ class VerificationService {
         .delete(verificationTokens)
         .where(eq(verificationTokens.email, email));
     }
-    console.log("3");
 
     // Insert new token
     await db.insert(verificationTokens).values({
@@ -33,7 +32,6 @@ class VerificationService {
       expires,
     });
 
-    console.log("4");
     // await db
     //   .update(verificationTokens)
     //   .set({ status: true })

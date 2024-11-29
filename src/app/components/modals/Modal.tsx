@@ -1,5 +1,5 @@
-'use client';
-import { ReactNode, useState } from 'react';
+"use client";
+import { ReactNode, useState } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -17,11 +17,11 @@ export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
-      onClick={handleBackdropClick}  
+      onClick={handleBackdropClick}
     >
-      <div className="relative bg-white py-8 px-6 rounded-lg max-w-xl min-w-72">
+      <div className="relative bg-white py-8 px-6 rounded-lg max-w-xl min-w-96">
         {children}
       </div>
     </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import TicketTransactionService from "@/server/api/services/TicketTransactionService";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,6 +41,14 @@ export async function POST(request: NextRequest) {
       })
       .where(eq(users.email, email))
       .returning({ updatedTicketCount: users.ticketCount });
+
+    // Record the transaction
+    await TicketTransactionService.recordTransaction(
+      email,
+      -1,
+      "CONSUMPTION",
+      "Used 1 interview ticket"
+    );
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../ui/Button";
 import Chip from "../ui/Chip";
 import Input from "../ui/Input";
@@ -13,8 +13,10 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
 import ConfirmModal from "./ConfirmModal";
+import { User } from "next-auth";
+import PaymentModal from "../payment/PaymentModal";
 
-export default function StartInterviewForm() {
+export default function StartInterviewForm({}) {
   const t = useTranslations();
   const ROLES = {
     [t("Administrative Assistant")]: "administrative_assistant",
@@ -79,12 +81,37 @@ export default function StartInterviewForm() {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File>();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   let interviewTypes = ["capability_interview", "behavioral_interview"];
   let interviewTypesText = [
     t("Capability Interview"),
     t("Behavioral Interview"),
   ];
+
+  useEffect(() => {
+    const userEmail = localStorage.getItem("userEmail");
+    const token = localStorage.getItem("emailVerificationToken");
+    const expires = localStorage.getItem("sessionExpires");
+
+    if (userEmail && token && expires && new Date(expires) > new Date()) {
+      setUserEmail(userEmail);
+    }
+  }, []);
+
+  const { data: userData, error: userDataError } =
+    api.ticket.getTransactionData.useQuery(
+      { email: userEmail ?? "" },
+      {
+        enabled: !!userEmail,
+        refetchOnWindowFocus: false,
+        retry: 1,
+        // onError: (error) => {
+        //   console.error("Error fetching user data:", error);
+        // },
+      }
+    );
 
   async function handleSearch(query: string): Promise<Option[]> {
     try {
@@ -125,7 +152,11 @@ export default function StartInterviewForm() {
 
   async function createInterview(formData: FormData) {
     try {
-      setShowConfirmModal(true);
+      if (userData?.user?.ticketCount === 0) {
+        setShowPaymentModal(true);
+      } else {
+        setShowConfirmModal(true);
+      }
     } catch (err) {
       console.log(err);
     } finally {
@@ -285,8 +316,17 @@ export default function StartInterviewForm() {
             accept="application/pdf"
           />
         </div>
-        <Button isLoading={loading}>
-          {t(`Experience a mock interview for free once`)}
+        <Button
+          isLoading={loading}
+          onClick={() => {
+            if (userData?.user?.ticketCount === 0) {
+              setShowPaymentModal(true);
+            }
+          }}
+        >
+          {userData?.user?.ticketCount === 0
+            ? t("Please purchase a ticket for the mock interview")
+            : t("Experience a mock interview for free once")}
         </Button>
       </form>
 
@@ -294,7 +334,13 @@ export default function StartInterviewForm() {
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleModalConfirm}
-        userEmail={formData.candidate_name}
+        // userEmail={formData.candidate_name}
+      />
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        // email={formData.candidate_name}
       />
     </>
   );

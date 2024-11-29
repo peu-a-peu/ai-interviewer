@@ -2,71 +2,72 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import Button from "../ui/Button";
-import { useRouter } from "next/navigation";
-import PaymentModal from "../payment/PaymentModal";
+import { useRouter, usePathname } from "next/navigation";
 import Ticket from "public/svgs/ticket";
 import ConfirmModal from "../form/ConfirmModal";
+import { useTranslations } from "next-intl";
+import { api } from "@/trpc/react";
+
+interface UserData {
+  userId: number;
+  email: string;
+  ticketCount: number;
+}
 
 export default function Navbar() {
+  const router = useRouter();
   const [emailVerified, setEmailVerified] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  // const t = useTranslations();
-  const [userData, setUserData] = useState<any>(null);
+  const pathname = usePathname();
+  const t = useTranslations();
+
+  const { data: transactionData, refetch } =
+    api.ticket.getTransactionData.useQuery(
+      { email: userEmail },
+      {
+        enabled: !!userEmail && emailVerified,
+        retry: 1,
+      }
+    );
+
+  useEffect(() => {
+    if (emailVerified && userEmail) {
+      refetch().catch(console.error);
+    }
+  }, [pathname, emailVerified, userEmail, refetch]);
 
   useEffect(() => {
     const token = localStorage.getItem("emailVerificationToken");
     const email = localStorage.getItem("userEmail");
     const expires = localStorage.getItem("sessionExpires");
 
-    if (token && email && expires && new Date(expires) > new Date()) {
+    if (
+      token &&
+      email &&
+      expires &&
+      new Date(expires) > new Date() &&
+      pathname
+    ) {
       setEmailVerified(true);
       setUserEmail(email);
     } else {
-      handleLogout();
+      console.log("logout");
+      // handleLogout();
     }
-  }, []);
+  }, [pathname]);
 
-  useEffect(() => {
-    if (emailVerified && userEmail) {
-      fetchUserData(userEmail);
-    }
-  }, [emailVerified, userEmail]);
-
-  const fetchUserData = async (email: string) => {
-    try {
-      const response = await fetch("/api/user-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      const userData = await response.json();
-      console.log("User data:", userData);
-      setUserData(userData);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-
-  const handleLogout = (event?: React.MouseEvent<HTMLButtonElement>) => {
+  const handleLogout = () => {
     localStorage.removeItem("emailVerificationToken");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("sessionExpires");
     setEmailVerified(false);
-    setUserEmail("");
+    router.push("/");
+    window.location.reload();
   };
 
   const handlePaymentClick = () => {
-    setShowPaymentModal(true);
+    router.push("/transaction-history");
   };
 
   const handleConfirm = () => {
@@ -81,46 +82,39 @@ export default function Navbar() {
             <Link href="/">
               <b>AI</b> Interviewer
             </Link>
-            <Link href="/login">Login</Link>
+            <button onClick={() => router.push("/login")}>{t("Login")}</button>
           </>
         ) : (
           <>
             <Link href="/">
               <b>AI</b> Interviewer
             </Link>
-            <div className="flex items-center gap-4 flex-row">
+            <div className="flex items-center gap-2 flex-row">
               <button
                 onClick={handlePaymentClick}
                 className="hover:text-gray-900"
               >
                 <div className="flex items-center gap-2">
                   <Ticket />
-                  {userData?.ticketCount}
+                  {transactionData?.user?.ticketCount}
                 </div>
               </button>
-
+              <div className=" h-6 border-r-2 border-[#DBDEE2]"></div>
               <button
                 onClick={handleLogout}
                 className="text-gray-600 hover:text-gray-900"
                 type="button"
               >
-                Logout
+                {t("Logout")}
               </button>
             </div>
           </>
         )}
       </nav>
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        email={userEmail}
-        // t={t}
-      />
       <ConfirmModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleConfirm}
-        userEmail={userEmail}
       />
     </>
   );

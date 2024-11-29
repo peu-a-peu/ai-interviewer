@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import TicketTransactionService from "@/server/api/services/TicketTransactionService";
+import { TransactionDetails } from "@/server/db/schema/transaction";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -14,6 +16,31 @@ export async function GET(request: NextRequest) {
   const secretKey = process.env.NEXT_PUBLIC_TOSS_SECRET_KEY;
   const url = "https://api.tosspayments.com/v1/payments/confirm";
   const basicToken = Buffer.from(`${secretKey}:`, "utf-8").toString("base64");
+
+  interface TossPaymentResponse {
+    version: string;
+    paymentKey: string;
+    type: string;
+    orderId: string;
+    orderName: string;
+    mId: string;
+    currency: string;
+    method: string;
+    totalAmount: number;
+    balanceAmount: number;
+    status: string;
+    requestedAt: string;
+    approvedAt: string;
+    useEscrow: boolean;
+    lastTransactionKey?: string;
+    suppliedAmount: number;
+    vat: number;
+    cultureExpense: number;
+    taxFreeAmount: number;
+    taxExemptionAmount: number;
+  }
+  // const id = localStorage.getItem("userId");
+  // console.log("payment ", id);
 
   try {
     const response = await fetch(url, {
@@ -29,7 +56,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as TossPaymentResponse;
+
+    console.log("data", data);
 
     if (data.status === "DONE") {
       // Update ticket count
@@ -42,6 +71,17 @@ export async function GET(request: NextRequest) {
           .then((rows) => rows[0]);
 
         if (user) {
+          // Store payment transaction
+          await db.insert(TransactionDetails).values({
+            userId: user.userId,
+            orderId: data.orderId,
+            orderName: data.orderName,
+            paymentKey: data.paymentKey,
+            paymentStatus: data.status,
+            paymentAmount: data.totalAmount.toString(),
+            data: JSON.stringify(data),
+          });
+
           await db
             .update(users)
             .set({
@@ -49,12 +89,18 @@ export async function GET(request: NextRequest) {
               updatedAt: new Date(),
             })
             .where(eq(users.email, email));
+
+          // Record the transaction
+          await TicketTransactionService.recordTransaction(
+            email,
+            Number(interviews),
+            "PURCHASE",
+            `Purchased ${interviews} interview tickets`
+          );
         }
       }
 
-      return NextResponse.redirect(
-        new URL(`/payment/complete?orderId=${orderId}`, request.url)
-      );
+      return NextResponse.redirect(new URL("/", request.url));
     } else {
       return NextResponse.redirect(
         new URL(`/payment/fail?orderId=${orderId}`, request.url)

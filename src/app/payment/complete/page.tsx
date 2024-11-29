@@ -16,7 +16,6 @@ export default function Page({
   // console.log("payments.totalAmount", payments.totalAmount);
 
   useEffect(() => {
-    debugger;
     const fetchPayments = async () => {
       try {
         const secretKey = process.env.NEXT_PUBLIC_TOSS_SECRET_KEY ?? "";

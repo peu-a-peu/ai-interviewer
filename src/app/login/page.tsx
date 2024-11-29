@@ -1,41 +1,50 @@
 "use client";
-import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../hooks/useAuth";
+import GoogleIcon from "public/svgs/google-icon";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth(false); // Pass false to not require auth
   const [formData, setFormData] = useState({
     email: "",
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
+  const t = useTranslations();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
+
+  const sendVerificationMutation =
+    api.emailVerification.sendVerification.useMutation({
+      onSuccess: () => {
+        setSuccess(true);
+      },
+      onError: (error) => {
+        setError(error.message);
+      },
+    });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
-
+    setIsLoadingGoogle(true);
     try {
-      const response = await fetch("/api/send-verification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: formData.email }),
+      await sendVerificationMutation.mutateAsync({
+        email: formData.email,
       });
-
-      const data: any = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send verification email");
-      }
-
-      setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
+      // Error handling is done in onError callback
     }
+    setIsLoadingGoogle(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,32 +55,39 @@ export default function LoginPage() {
     }));
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="max-w-md w-full space-y-6 p-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">AI Interviewer</h2>
           <p className="mt-2 text-sm text-gray-600">
-            4만개의 면접 질문을 학습한
+            {t("Please check your email")}
           </p>
-          <p className="text-sm text-gray-600">
-            AI 면접관과 모의면접을 진행해보세요!
-          </p>
+          <p className="text-sm text-gray-600"></p>
         </div>
 
         {success ? (
           <div className="text-center text-green-600">
-            <p>Verification email sent! Please check your inbox.</p>
+            <p>
+              {t(
+                "An email has been sent to the email address you entered Please click the link in the email"
+              )}
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <button
-              type="button"
-              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              <Image src="" alt="Google" className="h-5 w-5 mr-2" />
-              Continue with Google
-            </button>
+            <div className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <GoogleIcon />
+              <p className="ml-3"> Continue with Google</p>
+            </div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -94,13 +110,18 @@ export default function LoginPage() {
               />
 
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-
               <button
                 type="submit"
-                disabled={loading}
-                className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                disabled={isLoadingGoogle}
+                className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black "
               >
-                {loading ? "Sending..." : "Sign in with Email"}
+                {isLoadingGoogle ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-4 border-b-4 border-blue-500"></div>
+                  </>
+                ) : (
+                  "Sign in with Email"
+                )}
               </button>
             </form>
           </div>
