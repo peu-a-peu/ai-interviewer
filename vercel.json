@@ -3,13 +3,13 @@
     "deploymentEnabled": false
   },
   "env": {
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASSWORD": "@email_password"
+    "EMAIL_USER": "${EMAIL_USER}",
+    "EMAIL_PASSWORD": "${EMAIL_PASSWORD}"
   },
   "build": {
     "env": {
-      "EMAIL_USER": "@email_user",
-      "EMAIL_PASSWORD": "@email_password"
+      "EMAIL_USER": "${EMAIL_USER}",
+      "EMAIL_PASSWORD": "${EMAIL_PASSWORD}"
     }
   }
 }
