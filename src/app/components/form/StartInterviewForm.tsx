@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
 import ConfirmModal from "./ConfirmModal";
 import PaymentModal from "../payment/PaymentModal";
+import Checkbox from "../ui/Checkbox";
 
 export default function StartInterviewForm({}) {
   const t = useTranslations();
@@ -81,6 +82,7 @@ export default function StartInterviewForm({}) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   let interviewTypes = ["capability_interview", "behavioral_interview"];
   let interviewTypesText = [
@@ -372,6 +374,7 @@ export default function StartInterviewForm({}) {
             accept="application/pdf"
           />
         </div>
+
         <Button
           isLoading={loading}
           onClick={(e) => {
@@ -381,11 +384,37 @@ export default function StartInterviewForm({}) {
               return;
             }
           }}
+          disabled={!acceptTerms}
+          extraClasses="disabled:opacity-50"
         >
           {userData?.user?.ticketCount === 0
             ? t("Please purchase a ticket for the mock interview")
-            : t("Experience a mock interview for free once")}
+            : userData?.user?.ticketCount === 1
+              ? t("Experience a mock interview for free once")
+              : t("Conduct a mock interview")}
         </Button>
+        <div>
+          <div className="flex items-start gap-2">
+            <Checkbox
+              id="terms"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+            />
+            <label htmlFor="terms" className="text-sm text-gray-600">
+              {t(
+                "I agree to the collection of data necessary to prevent duplicate use of the free trial service"
+              )}{" "}
+              {/* <a href="/terms" className="text-blue-600 hover:underline">
+                {t("Terms & Conditions")}
+              </a> */}
+            </label>
+          </div>
+          {/* {formErrors?.acceptTerms && (
+            <p className="text-red-500 text-sm mt-1">
+              {formErrors.acceptTerms}
+            </p>
+          )} */}
+        </div>
       </form>
 
       <ConfirmModal
