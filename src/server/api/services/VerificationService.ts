@@ -1,4 +1,5 @@
 import { db } from "@/server/db";
+import { ticketTransactions } from "@/server/db/schema/ticketTransaction";
 import { users } from "@/server/db/schema/user";
 import { verificationTokens } from "@/server/db/schema/verificationToken";
 import { eq } from "drizzle-orm";
@@ -67,6 +68,26 @@ class VerificationService {
         email,
         ticketCount: 1, // Default ticket count
         updatedAt: new Date(),
+      });
+
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      console.log("user: ", user);
+
+      if (!user[0]?.userId) {
+        throw new Error("User not found");
+      }
+
+      await db.insert(ticketTransactions).values({
+        userId: user[0].userId,
+        ticketBalanceChange: 1,
+        type: "PURCHASE",
+        description: "free ticket",
+        createdAt: new Date(),
       });
     }
 

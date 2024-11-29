@@ -7,6 +7,8 @@ import Ticket from "public/svgs/ticket";
 import ConfirmModal from "../form/ConfirmModal";
 import { useTranslations } from "next-intl";
 import { api } from "@/trpc/react";
+import { setUserLocale } from "@/app/services/locale";
+import ProductLogo from "public/svgs/productLogo";
 
 interface UserData {
   userId: number;
@@ -21,6 +23,11 @@ export default function Navbar() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const pathname = usePathname();
   const t = useTranslations();
+
+  useEffect(() => {
+    const browserLocale = navigator.language || navigator.languages[0] || "en";
+    setUserLocale(browserLocale);
+  }, [pathname]);
 
   const { data: transactionData, refetch } =
     api.ticket.getTransactionData.useQuery(
@@ -62,8 +69,7 @@ export default function Navbar() {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("sessionExpires");
     setEmailVerified(false);
-    router.push("/");
-    window.location.reload();
+    router.replace("/");
   };
 
   const handlePaymentClick = () => {
@@ -77,18 +83,11 @@ export default function Navbar() {
   return (
     <>
       <nav className="px-8 py-4 text-xl flex justify-between items-center">
-        {!emailVerified ? (
+        <Link href="/">
+          <ProductLogo />
+        </Link>
+        {emailVerified ? (
           <>
-            <Link href="/">
-              <b>AI</b> Interviewer
-            </Link>
-            <button onClick={() => router.push("/login")}>{t("Login")}</button>
-          </>
-        ) : (
-          <>
-            <Link href="/">
-              <b>AI</b> Interviewer
-            </Link>
             <div className="flex items-center gap-2 flex-row">
               <button
                 onClick={handlePaymentClick}
@@ -108,6 +107,10 @@ export default function Navbar() {
                 {t("Logout")}
               </button>
             </div>
+          </>
+        ) : (
+          <>
+            <button onClick={() => router.push("/login")}>{t("Login")}</button>
           </>
         )}
       </nav>

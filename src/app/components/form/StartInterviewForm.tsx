@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
 import ConfirmModal from "./ConfirmModal";
-import { User } from "next-auth";
 import PaymentModal from "../payment/PaymentModal";
 
 export default function StartInterviewForm({}) {
@@ -62,13 +61,12 @@ export default function StartInterviewForm({}) {
       .min(1, { message: t("Enter position for which you are applying for") }),
   });
 
-  // Infer TypeScript types from the schema
   type FormData = z.infer<typeof formSchema>;
 
   const initialState: FormData = {
     candidate_name: "",
     company_id: "",
-    experience: 0,
+    experience: NaN,
     interview_type: "",
     resume_summary: "",
     position: "",
@@ -135,7 +133,6 @@ export default function StartInterviewForm({}) {
       return validatedData;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // Handle validation errors
         const formErrors = error.errors;
         const newErrors: Record<string, string> = {};
         formErrors.forEach((error) => {
@@ -152,17 +149,61 @@ export default function StartInterviewForm({}) {
 
   async function createInterview(formData: FormData) {
     try {
-      if (userData?.user?.ticketCount === 0) {
+      localStorage.setItem(
+        "formData",
+        JSON.stringify({
+          candidate_name: formData.candidate_name,
+          job_title: formData.position,
+          company_id: formData.company_id,
+          experience: formData.experience,
+          interview_type: formData.interview_type,
+        })
+      );
+
+      // Skip validation if no tickets or no user email
+      if (!userEmail || userData?.user?.ticketCount === 0) {
         setShowPaymentModal(true);
-      } else {
-        setShowConfirmModal(true);
+        return;
       }
+
+      // Only validate if user has tickets and is logged in
+      const validatedData = validate();
+      if (!validatedData) {
+        return;
+      }
+
+      setShowConfirmModal(true);
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
     }
   }
+  const handleLoginRedirect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    localStorage.setItem(
+      "formData",
+      JSON.stringify({
+        candidate_name: formData.candidate_name,
+        experience: formData.experience,
+        interview_type: formData.interview_type,
+      })
+    );
+    router.push("/login");
+  };
+
+  useEffect(() => {
+    const savedFormData = localStorage.getItem("formData");
+    if (savedFormData) {
+      const parsedData = JSON.parse(savedFormData);
+      setFormData((prev) => ({
+        ...prev,
+        candidate_name: parsedData.candidate_name || "",
+        experience: parsedData.experience || "",
+        interview_type: parsedData.interview_type || "",
+      }));
+    }
+  }, []);
 
   const handleModalConfirm = async () => {
     try {
@@ -171,6 +212,7 @@ export default function StartInterviewForm({}) {
         ...formData,
       });
       router.push(`/interview/${data}`);
+      localStorage.removeItem("formData");
     } catch (err) {
       console.log(err);
     } finally {
@@ -181,6 +223,19 @@ export default function StartInterviewForm({}) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Skip validation if user has no tickets
+    if (!userEmail || userData?.user?.ticketCount === 0) {
+      const summary = await extractText();
+      handleChange("resume_summary", summary);
+      createInterview({
+        ...formData,
+        resume_summary: summary || "",
+      });
+      return;
+    }
+
+    // Proceed with validation for users with tickets
     const data: FormData | null = validate();
     if (data) {
       setLoading(true);
@@ -269,6 +324,7 @@ export default function StartInterviewForm({}) {
               handleChange("experience", parseInt(e.target.value))
             }
             type="number"
+            value={formData.experience}
             classes="w-16 pr-14 "
             placeholder={t(`Please enter total years of experience`)}
             tailText={t("years")}
@@ -318,9 +374,11 @@ export default function StartInterviewForm({}) {
         </div>
         <Button
           isLoading={loading}
-          onClick={() => {
-            if (userData?.user?.ticketCount === 0) {
-              setShowPaymentModal(true);
+          onClick={(e) => {
+            if (!userEmail) {
+              e.preventDefault();
+              handleLoginRedirect(e);
+              return;
             }
           }}
         >

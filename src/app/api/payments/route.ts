@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
   const orderId = searchParams.get("orderId");
   const paymentKey = searchParams.get("paymentKey");
   const amount = searchParams.get("amount");
-  const email = searchParams.get("email");
+  const encodedEmail = searchParams.get("email");
+  const email = decodeURIComponent(encodedEmail || "").replace(/\s/g, "+");
   const interviews = searchParams.get("interviews");
 
   const secretKey = process.env.NEXT_PUBLIC_TOSS_SECRET_KEY;

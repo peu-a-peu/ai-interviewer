@@ -67,7 +67,7 @@ export default function VerifyEmail() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-500 mx-2"></div>
-          <p className="mt-4 text-gray-600">Verifying your email...</p>
+          <p className="mt-4 text-gray-600">{t("Verifying your email")}</p>
         </div>
       </div>
     );

@@ -1,22 +1,22 @@
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { setUserLocale } from "../services/locale";
+// import { setUserLocale } from "../services/locale";
 import StartInterviewForm from "../components/form/StartInterviewForm";
 import Lottie from "react-lottie-player";
 import SpeakingAnimation from "../lotties/speaking.json";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation";
 export default function Home() {
   const t = useTranslations();
-  const path = usePathname();
-  useEffect(() => {
-    const browserLocale =
-      path == "/" ? navigator.language || navigator.languages[0] || "en" : "en";
-    setUserLocale(browserLocale);
-  }, []);
+  // const path = usePathname();
+  // useEffect(() => {
+  //   const browserLocale =
+  //     path == "/" ? navigator.language || navigator.languages[0] || "en" : "en";
+  //   setUserLocale(browserLocale);
+  // }, []);
   return (
     <section className="flex flex-col items-center justify-center max-w-3xl mx-auto">
       <section className="py-10 px-3 mx-6">
-        <h1 className="whitespace-pre-line text-[44px] md:text-5xl !leading-normal font-bold text-black text-center">
+        <h1 className="whitespace-pre-line text-[32px] md:text-5xl !leading-normal font-bold text-black text-center">
           {t(
             `Mock interviews with an AI interviewer trained on 40,000 interview questions`
           )}
