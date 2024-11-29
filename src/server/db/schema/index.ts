@@ -89,20 +89,6 @@ import { TransactionDetails } from "./transaction";
 //   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 // }));
 
-// export const verificationTokens = pgTable(
-//   "verification_token",
-//   {
-//     identifier: varchar("identifier", { length: 255 }).notNull(),
-//     token: varchar("token", { length: 255 }).notNull(),
-//     expires: timestamp("expires", {
-//       mode: "date",
-//       withTimezone: true,
-//     }).notNull(),
-//   },
-//   (vt) => ({
-//     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-//   })
-// );
 export { company } from "./company";
 export { question } from "./question";
 export { interview } from "./interview";
