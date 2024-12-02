@@ -16,7 +16,9 @@ export const emailVerificationRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: 'smtp.gmail.com',
+        port: 587,         // TLS port
+        secure: false,
         auth: {
           user: env.EMAIL_USER,
           pass: env.EMAIL_PASSWORD,
