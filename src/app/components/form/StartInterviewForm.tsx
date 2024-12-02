@@ -32,7 +32,6 @@ export default function StartInterviewForm({}) {
     [t("Product Manager")]: "product_manager",
     [t("Quality Assurance (QA)")]: "quality_assurance",
     [t("Research and Development (R&D)")]: "research_and_development",
-    [t("Sales & Marketing")]: "sales_and_marketing",
     [t("Sales Representative")]: "sales_representative",
     [t("Software Engineer")]: "software_engineer",
     [t("Product Designer")]: "product_designer",

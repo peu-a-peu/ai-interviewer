@@ -4,27 +4,22 @@ import nodemailer from "nodemailer";
 import crypto from "crypto";
 import VerificationService from "@/server/api/services/VerificationService";
 import { TRPCError } from "@trpc/server";
+import { env } from "@/env";
 
 export const emailVerificationRouter = createTRPCRouter({
   sendVerification: publicProcedure
     .input(
       z.object({
         email: z.string().email(),
-        user: z.string(),
-        pass: z.string(),
         redirectUrl: z.string(),
       })
     )
     .mutation(async ({ input }) => {
-      console.log("email and pass: ", {
-        user: input.user,
-        pass: input.pass,
-      });
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: input.user,
-          pass: input.pass,
+          user: env.EMAIL_USER,
+          pass: env.EMAIL_PASSWORD,
         },
         debug: true,
       });
@@ -36,7 +31,7 @@ export const emailVerificationRouter = createTRPCRouter({
 
       // Email content
       const mailOptions = {
-        from: input.user,
+        from: env.EMAIL_USER,
         to: input.email,
         subject: "Email Verification",
         html: `
@@ -51,6 +46,7 @@ export const emailVerificationRouter = createTRPCRouter({
         await transporter.sendMail(mailOptions);
         return { success: true };
       } catch (error) {
+        console.log(error)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to send verification email",

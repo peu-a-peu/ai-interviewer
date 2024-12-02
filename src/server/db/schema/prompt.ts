@@ -14,4 +14,5 @@ export const prompt = pgTable("prompts", {
     company_id: char("company_id", { length: 26 }),
     prompt: text("prompt").notNull(),
     created_at: timestamp('created_at').defaultNow().notNull(),
+    updated_at: timestamp('updated_at').defaultNow().notNull(),
 })
