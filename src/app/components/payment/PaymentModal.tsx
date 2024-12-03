@@ -51,7 +51,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
         const tossPayments = await loadTossPayments(
           process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? ""
         );
-        await tossPayments.requestPayment("카드", {
+        await tossPayments.requestPayment({
           amount: tier.price,
           customerEmail: email ?? undefined,
           orderId: Math.random().toString(36).slice(2),
