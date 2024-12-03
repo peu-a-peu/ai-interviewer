@@ -1,15 +1,13 @@
 import { relations, sql } from "drizzle-orm";
-import {
-  char,
-  text,
-  timestamp,
-  varchar,
-  pgTable
-} from "drizzle-orm/pg-core";
+import { char, text, timestamp, varchar, pgTable } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 import { ulid } from "ulidx";
 import { company } from "./company";
 import { question } from "./question";
+import { verificationTokens } from "./verificationToken";
+import { users } from "./user";
+import { ticketTransactions } from "./ticketTransaction";
+import { TransactionDetails } from "./transaction";
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
  * database instance for multiple projects.
@@ -91,22 +89,12 @@ import { question } from "./question";
 //   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 // }));
 
-// export const verificationTokens = pgTable(
-//   "verification_token",
-//   {
-//     identifier: varchar("identifier", { length: 255 }).notNull(),
-//     token: varchar("token", { length: 255 }).notNull(),
-//     expires: timestamp("expires", {
-//       mode: "date",
-//       withTimezone: true,
-//     }).notNull(),
-//   },
-//   (vt) => ({
-//     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-//   })
-// );
-export { company } from './company';
-export { question } from './question';
-export { interview } from './interview';
-export { conversation } from './conversation';
-export { prompt } from "./prompt"
+export { company } from "./company";
+export { question } from "./question";
+export { interview } from "./interview";
+export { conversation } from "./conversation";
+export { prompt } from "./prompt";
+export { verificationTokens } from "./verificationToken";
+export { users } from "./user";
+export { ticketTransactions } from "./ticketTransaction";
+export { TransactionDetails } from "./transaction";

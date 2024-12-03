@@ -1,11 +1,8 @@
 import { env } from "@/env";
 import { InterviewInput, SystemPromptInput } from "../interfaces/OpenAiInterface";
 import PromptService from "../api/services/PromptService";
+import { DEFAULT_BASE_PROMPT } from "../constants/constant";
 
-const PROMPT_KEYS: Record<string, string> = {
-    default: "DEFAULT_SYSTEM_PROMPT",
-    pm: "PM_SYSTEM_PROMPT"
-}
 function candiatePrompt(promptVariables: InterviewInput) {
     let prompt = ""
     const { experience, position, resume_summary, interview_type, name } = promptVariables
@@ -33,17 +30,16 @@ function candiatePrompt(promptVariables: InterviewInput) {
 export function languagePrompt(language:string) {
     return ` YOU ARE STRICTLY ADVISED TO KEEP CONVERSATION IN ${language} ONLY`
 }
-export async function getSystemPrompt(promptVariables: SystemPromptInput, key?: string) {
-    const { questions, created_at, language } = promptVariables
-    let mappedKey = PROMPT_KEYS[key || "default"] || PROMPT_KEYS["default"] as string
-    let prompt = await PromptService.getPromptByKey(mappedKey)
-    prompt += candiatePrompt(promptVariables)
-    if (questions?.length) {
-        prompt += `\n These are the few questions you can ask to candidate. \n`
-        prompt += questions.map((item, index) => `${index + 1}. ${item}`).join(`\n`)
+export async function getSystemPrompt(promptVariables: SystemPromptInput):Promise<string> {
+    const { created_at, language, position, interview_type } = promptVariables
+    let [prompt="",specialPrompt] = await PromptService.getPromptByPosition(position!, interview_type)
+    prompt+=specialPrompt||""
+    if(!prompt){
+        prompt+=DEFAULT_BASE_PROMPT
     }
+    prompt += candiatePrompt(promptVariables)
+   
     if (created_at) {
-        console.log({created_at, diff: (new Date().valueOf() - new Date(created_at).valueOf())})
         let mins: number = Math.floor((new Date().valueOf() - new Date(created_at).valueOf()) / 60000)
         prompt += ` It has been ${mins} minutes since the interview started.`
     }

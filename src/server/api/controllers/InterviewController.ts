@@ -2,7 +2,6 @@ import AiFactory from "../Factory/AiFactory";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import InterviewService from "../services/InterviewService";
 import { NewInterview } from "@/server/interfaces/drizzle";
-import QuestionsService from "../services/QuestionsService";
 import CustomError from "@/app/components/utils/CustomError";
 import { evaluationPrompt, getSystemPrompt } from "@/server/libs/system-prompt";
 import { OpenAIContent, SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
@@ -22,22 +21,19 @@ class InterviewController {
         if (!currentInterview || currentInterview.ended_at) {
             throw new CustomError("Interview not found", 404)
         }
-        const [conversations, questions] = await Promise.all([
-            InterviewService.getInterviewConversations(interviewId),
-            QuestionsService.getQuestionsForCompany(currentInterview)
-        ])
+        const conversations = await  InterviewService.getInterviewConversations(interviewId)
+           
 
-        const { experience, interview_type, resume_summary, position,created_at, category, candidate_name, language } = currentInterview
+        const { experience, interview_type, resume_summary, position,created_at, candidate_name, language } = currentInterview
         const prompt = await getSystemPrompt({
             name: candidate_name,
             experience,
             interview_type,
             resume_summary,
             position,
-            questions,
             created_at,
             language
-        } as SystemPromptInput, category)
+        } as SystemPromptInput)
 
         let lastAns:OpenAIContent="", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
@@ -66,11 +62,10 @@ class InterviewController {
             role: "system"
         })
 
-        // const isOver = aiResponse.includes("%EXIT%")
-        // if (isOver) {
-        //     aiResponse = aiResponse.replace('%EXIT%', '')
-        //     await InterviewService.closeInterview(interviewId)
-        // }
+        const isOver = aiResponse.text.includes("<<END_INTERVIEW>>")
+        if (isOver) {
+            await InterviewService.closeInterview(interviewId)
+        }
 
         await Promise.all([
             InterviewService.addConversation(interviewId, aiResponse.text),
