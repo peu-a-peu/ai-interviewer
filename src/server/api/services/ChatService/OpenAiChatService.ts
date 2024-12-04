@@ -9,7 +9,7 @@ class OpenAiChatService implements ChatService{
         this.instance = OpenAiConnection.getInstance()
     }
 
-    getAiResponse = async(param:GetOpenAiResponseParam)=>{
+    getAiAudioResponse = async(param:GetOpenAiResponseParam)=>{
         const {role, prompt, messageContext=[]} = param;
         let messages = [{
             role,
@@ -18,17 +18,33 @@ class OpenAiChatService implements ChatService{
       
         const res = await  this.instance.client.chat.completions.create({
             model: env.OPENAI_CHAT_MODEL!,
-            modalities: ["text", "audio"],
+            modalities: ["text","audio"],
             //@ts-ignore
-            audio: { voice: "alloy", format: "wav" },
+            audio: { voice: "alloy", format: "mp3" },
             messages
         })
 
-        console.log(res.choices[0]?.message)
+        console.log({T: res.choices[0]})
 
         let audio = res.choices[0]?.message?.audio
-        console.log(audio)
         return {base64audio: audio?.data || "", text: audio?.transcript || "", id: audio?.id || ""}
+    }
+    
+    getAiTextResponse = async(param:GetOpenAiResponseParam)=>{
+        const {role, prompt, messageContext=[]} = param;
+        let messages = [{
+            role,
+            content: prompt,
+        },...messageContext] as ChatCompletionMessageParam[]
+      
+        const res = await  this.instance.client.chat.completions.create({
+            model: env.OPENAI_CHAT_MODEL!,
+            modalities: ["text"],
+            messages
+        })
+
+        let text = res.choices[0]?.message?.content || ""
+        return {text}
     }
 
 }

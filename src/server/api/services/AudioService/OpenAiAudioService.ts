@@ -1,6 +1,5 @@
 import { Uploadable } from "openai/uploads.mjs";
 import OpenAiConnection from "../../connections/OpenAI/OpenAiConnection";
-import openAIService from "../AiChatService";
 import { AudioService } from "../TextToSpeechService";
 import { env } from "@/env";
 import { Transcription } from "openai/resources/audio/transcriptions.mjs";

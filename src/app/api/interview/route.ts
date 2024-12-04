@@ -13,7 +13,7 @@ export async function POST(request: NextRequest, res:NextResponse) {
     // Assuming getNextQuestion returns a Blob or buffer
     const {mp3, isOver} = await InterviewController.getNextQuestion(interviewId, audioBlob);
     if(!mp3){
-        return NextResponse.json({ message: 'No audio available' }, { status: 204 });
+        return NextResponse.json({ message: 'No audio available' }, { status: 200 });
     }
     // Convert Blob to ArrayBuffer or Buffer
     const buffer = Buffer.from(mp3,'base64');

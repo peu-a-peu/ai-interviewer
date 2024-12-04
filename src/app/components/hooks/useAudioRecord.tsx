@@ -4,44 +4,44 @@ import hark from "hark";
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 
 export const useRecordVoice = () => {
-    const mediaRecorder = useRef<MediaRecorder | null>(null);
-    const chunks = useRef<Blob[]>([]);
-    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-    const silenceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const silenceDuration = 2000; // Duration to wait before stopping recording
-    const [recordingStatus, setRecordingStatus] = useState<"recording" | "paused" | "inactive">("inactive");
-    const harkEventsRef = useRef<hark.Harker | null>(null);
-    const harkStoppedRef = useRef<boolean>(false)
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const silenceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const silenceDuration = 2000; // Duration to wait before stopping recording
+  const [recordingStatus, setRecordingStatus] = useState<"recording" | "paused" | "inactive">("inactive");
+  const harkEventsRef = useRef<hark.Harker | null>(null);
+  const harkStoppedRef = useRef<boolean>(false)
 
 
-    async function convertBlobToOpus(webmBlob: Blob) {
-        const ffmpeg = new FFmpeg();
-        await ffmpeg.load();
+  async function convertBlob(blob: Blob) {
+    const ffmpeg = new FFmpeg();
+    await ffmpeg.load();
 
-        // Step 2: Read the Blob into an ArrayBuffer
-        const arrayBuffer = await webmBlob.arrayBuffer();
+    // Step 2: Read the Blob into an ArrayBuffer
+    const arrayBuffer = await blob.arrayBuffer();
 
-        // Step 3: Write the ArrayBuffer to FFmpeg's in-memory filesystem
-        await ffmpeg.writeFile('input.webm', new Uint8Array(arrayBuffer));
+    // Step 3: Write the ArrayBuffer to FFmpeg's in-memory filesystem
+    await ffmpeg.writeFile('input.mp4', new Uint8Array(arrayBuffer));
 
-        // Step 4: Run the conversion command
-        await ffmpeg.exec(['-i', 'input.webm', '-c:a', 'libopus', 'output.opus']);
+    // Step 4: Run the conversion command
+    await ffmpeg.exec(['-i', 'input.mp4', 'output.mp3']);
 
-        // Step 5: Read the output file as a Uint8Array
-        const outputData = await ffmpeg.readFile('output.opus');
+    // Step 5: Read the output file as a Uint8Array
+    const outputData = await ffmpeg.readFile('output.mp3');
 
-        // Step 6: Convert the output to a Blob (if required)
-        const opusBlob = new Blob([outputData], { type: 'audio/opus' });
+    // Step 6: Convert the output to a Blob (if required)
+    const outputBlob = new Blob([outputData], { type: 'audio/mp3' });
 
-        return opusBlob; // Now you have your opus Blob
+    return outputBlob; // Now you have your opus Blob
+  }
+
+  const startMediaRecording = () => {
+    if (mediaRecorder.current) {
+      mediaRecorder.current.start();
+      setRecordingStatus("recording");
     }
-
-    const startMediaRecording = () => {
-        if (mediaRecorder.current) {
-            mediaRecorder.current.start();
-            setRecordingStatus("recording");
-        }
-    };
+  };
 
   const pauseMediaRecording = () => {
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
@@ -68,15 +68,18 @@ export const useRecordVoice = () => {
   };
 
   const initializeMediaRecorder = (stream: MediaStream) => {
-    const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+    const recorder = new MediaRecorder(stream, { mimeType: "audio/mp4" });
     recorder.ondataavailable = (event) => {
       chunks.current.push(event.data);
     };
 
-    recorder.onstop = () => {
-      const webmBlob = new Blob(chunks.current, { type: "audio/webm" });
-      harkStoppedRef.current === false && setAudioBlob(webmBlob);
-      chunks.current = []; // Reset chunks for the next recording
+    recorder.onstop = async() => {
+      const audioBlob = new Blob(chunks.current, { type: "audio/mp4" });
+      if (harkStoppedRef.current === false) {
+        const convertedBlob = await convertBlob(audioBlob)
+        setAudioBlob(convertedBlob);
+        chunks.current = [];
+      }
     };
 
     mediaRecorder.current = recorder;

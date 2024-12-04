@@ -60,7 +60,7 @@ export function evaluationPrompt(promptVariables: InterviewInput) {
     "Attention to Detail": "Missed a few minor edge cases during problem-solving exercises.",
   }
 }
-   Make sure the there should be max 5 subkeys and should not be more than 1-2 lines.`
+   Make sure the there should be max 5 subkeys and should not be more than 1-2 lines. You only have to respond in valid JSON format. Do not include any other text outside the JSON.`
     prompt += candiatePrompt(promptVariables)
     prompt += languagePrompt(promptVariables.language)
     return prompt

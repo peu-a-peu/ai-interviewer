@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.1.0",
+    "@ffmpeg/ffmpeg": "^0.12.10",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@tosspayments/payment-sdk": "^1.9.1",

@@ -1,13 +1,19 @@
 import { GetOpenAiResponseParam } from "../../interfaces/OpenAiInterface"
 
 type GetResponseParam = GetOpenAiResponseParam
-export interface ChatAIResponse{
+export interface AIAudioResponse{
     base64audio:string;
     text:string;
     id:string;
 }
+
+export interface AITextResponse{
+    text:string;
+}
+
 export interface ChatService {
-    getAiResponse(param:GetResponseParam):Promise<ChatAIResponse>
+    getAiAudioResponse(param:GetResponseParam):Promise<AIAudioResponse>
+    getAiTextResponse(param:GetResponseParam):Promise<AITextResponse>
 }
 
 
@@ -17,8 +23,12 @@ class AiChatService{
         this.service = service
     }
 
-    getResponse(param:GetResponseParam){
-        this.service.getAiResponse(param)
+    getAudioResponse(param:GetResponseParam){
+        this.service.getAiAudioResponse(param)
+    }
+
+    getTextResponse(param:GetResponseParam){
+        this.service.getAiTextResponse(param)
     }
 }
 

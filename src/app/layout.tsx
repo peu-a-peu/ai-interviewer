@@ -8,7 +8,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import Navbar from "./components/navigation/Navbar";
 
 export const metadata: Metadata = {
-  title: "AI Interviewer",
+  title: "AI Interviewer demo",
   description: "AI Interviewer - your ultimate guide to cracking interviews",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
