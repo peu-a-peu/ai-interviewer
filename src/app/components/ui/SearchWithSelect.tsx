@@ -37,9 +37,11 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
 
     useClickOutside(dropdownRef, () => setOpen(false));
 
-    useEffect(() => {
-
-    }, [searchValue])
+    useEffect(()=>{
+        setSelection(selection)
+        setSearch(selected?.label||"")
+      },[selected])
+  
 
     async function callApi(val: string) {
         setLoading(true)

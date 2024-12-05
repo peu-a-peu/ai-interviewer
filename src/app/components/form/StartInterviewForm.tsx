@@ -16,7 +16,7 @@ import ConfirmModal from "./ConfirmModal";
 import PaymentModal from "../payment/PaymentModal";
 import Checkbox from "../ui/Checkbox";
 
-export default function StartInterviewForm({}) {
+export default function StartInterviewForm({ }) {
   const t = useTranslations();
   const ROLES = {
     [t("Administrative Assistant")]: "administrative_assistant",
@@ -81,7 +81,8 @@ export default function StartInterviewForm({}) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(true);
+  const [showTerms, setShowTerms] = useState(false);
 
   let interviewTypes = ["capability_interview", "behavioral_interview"];
   let interviewTypesText = [
@@ -93,9 +94,13 @@ export default function StartInterviewForm({}) {
     const userEmail = localStorage.getItem("userEmail");
     const token = localStorage.getItem("emailVerificationToken");
     const expires = localStorage.getItem("sessionExpires");
-
+    const agreed = localStorage.getItem("agreed")
     if (userEmail && token && expires && new Date(expires) > new Date()) {
       setUserEmail(userEmail);
+    }
+    if (!agreed) {
+      setAcceptTerms(false)
+      setShowTerms(true)
     }
   }, []);
 
@@ -150,17 +155,6 @@ export default function StartInterviewForm({}) {
 
   async function createInterview(formData: FormData) {
     try {
-      localStorage.setItem(
-        "formData",
-        JSON.stringify({
-          candidate_name: formData.candidate_name,
-          job_title: formData.position,
-          company_id: formData.company_id,
-          experience: formData.experience,
-          interview_type: formData.interview_type,
-        })
-      );
-
       // Skip validation if no tickets or no user email
       if (!userEmail || userData?.user?.ticketCount === 0) {
         setShowPaymentModal(true);
@@ -180,30 +174,34 @@ export default function StartInterviewForm({}) {
       setLoading(false);
     }
   }
-  const handleLoginRedirect = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleLoginRedirect = () => {
     localStorage.setItem(
       "formData",
-      JSON.stringify({
-        candidate_name: formData.candidate_name,
-        experience: formData.experience,
-        interview_type: formData.interview_type,
-      })
+      JSON.stringify(formData)
     );
+    if (selected) {
+      localStorage.setItem("company", JSON.stringify(selected))
+    }
     router.push("/login");
   };
 
   useEffect(() => {
     const savedFormData = localStorage.getItem("formData");
+    const savedCompany = localStorage.getItem("company")
+    console.log({ savedCompany })
     if (savedFormData) {
       const parsedData = JSON.parse(savedFormData);
       setFormData((prev) => ({
         ...prev,
-        candidate_name: parsedData.candidate_name || "",
-        experience: parsedData.experience || "",
-        interview_type: parsedData.interview_type || "",
+        ...parsedData
       }));
+      localStorage.removeItem("formData")
     }
+    if (savedCompany) {
+      setSelected(JSON.parse(savedCompany))
+      localStorage.removeItem("company")
+    }
+
   }, []);
 
   const handleModalConfirm = async () => {
@@ -224,6 +222,11 @@ export default function StartInterviewForm({}) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!userEmail) {
+      localStorage.setItem("agreed", "agreed")
+      handleLoginRedirect();
+      return;
+    }
 
     // Skip validation if user has no tickets
     if (!userEmail || userData?.user?.ticketCount === 0) {
@@ -243,6 +246,7 @@ export default function StartInterviewForm({}) {
       const summary = await extractText();
       handleChange("resume_summary", summary);
       data.resume_summary = summary || "";
+      localStorage.setItem("agreed", "agreed")
       createInterview(data);
     }
   }
@@ -280,7 +284,7 @@ export default function StartInterviewForm({}) {
     <>
       <form
         className="max-w-xl flex flex-col gap-8 mx-auto"
-        onSubmit={loading ? () => {} : handleSubmit}
+        onSubmit={loading ? () => { } : handleSubmit}
       >
         <div>
           <Label>{t("Name")}</Label>
@@ -308,6 +312,7 @@ export default function StartInterviewForm({}) {
         <div>
           <Label>{t(`Job title`)}</Label>
           <Select
+            selected={roleOptions.find((item) => item.value === formData.position)}
             allowSearchToBeValue
             error={formErrors?.position}
             placeholder={t(`Search job title`)}
@@ -376,13 +381,6 @@ export default function StartInterviewForm({}) {
 
         <Button
           isLoading={loading}
-          onClick={(e) => {
-            if (!userEmail) {
-              e.preventDefault();
-              handleLoginRedirect(e);
-              return;
-            }
-          }}
           disabled={!acceptTerms}
           extraClasses="disabled:opacity-50"
         >
@@ -392,8 +390,7 @@ export default function StartInterviewForm({}) {
               ? t("Experience a mock interview for free once")
               : t("Conduct a mock interview")}
         </Button>
-        <div>
-          <div className="flex items-start gap-2">
+          {showTerms && <div className="flex items-start gap-2">
             <Checkbox
               id="terms"
               checked={acceptTerms}
@@ -403,30 +400,22 @@ export default function StartInterviewForm({}) {
               {t(
                 "I agree to the collection of data necessary to prevent duplicate use of the free trial service"
               )}{" "}
-              {/* <a href="/terms" className="text-blue-600 hover:underline">
-                {t("Terms & Conditions")}
-              </a> */}
+              
             </label>
-          </div>
-          {/* {formErrors?.acceptTerms && (
-            <p className="text-red-500 text-sm mt-1">
-              {formErrors.acceptTerms}
-            </p>
-          )} */}
-        </div>
+          </div>}
       </form>
 
       <ConfirmModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleModalConfirm}
-        // userEmail={formData.candidate_name}
+      // userEmail={formData.candidate_name}
       />
 
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        // email={formData.candidate_name}
+      // email={formData.candidate_name}
       />
     </>
   );

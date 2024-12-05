@@ -128,7 +128,7 @@ export default function ViewPage({
 
   async function closeInterview() {
     await mutation.mutateAsync({ interviewId });
-    router.replace("/");
+    router.replace(`/feedback/${interviewId}`);
   }
   return (
     <div>

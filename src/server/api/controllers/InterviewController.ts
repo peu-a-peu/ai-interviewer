@@ -19,10 +19,10 @@ class InterviewController {
         if (!currentInterview || currentInterview.ended_at) {
             throw new CustomError("Interview not found", 404)
         }
-        const conversations = await  InterviewService.getInterviewConversations(interviewId)
-           
+        const conversations = await InterviewService.getInterviewConversations(interviewId)
 
-        const { experience, interview_type, resume_summary, position,created_at, candidate_name, language } = currentInterview
+
+        const { experience, interview_type, resume_summary, position, created_at, candidate_name, language } = currentInterview
         const prompt = await getSystemPrompt({
             name: candidate_name,
             experience,
@@ -93,17 +93,17 @@ Resume text: ${resumeContent}`
         return await InterviewService.closeInterview(interviewId)
     }
 
-    
-    static async evaluateAnswers(interviewId: string):Promise<EvaluationResponse> {
+
+    static async evaluateAnswers(interviewId: string): Promise<EvaluationResponse> {
         const currentInterview = await InterviewService.getInterviewById(interviewId)
         if (!currentInterview) {
             throw new CustomError("Interview not found", 404)
         }
-        const { experience, interview_type, resume_summary, position, candidate_name, feedback } = currentInterview
-        if(feedback){
+        const { experience, interview_type, resume_summary, position, candidate_name, feedback, language } = currentInterview
+        if (feedback) {
             return {
                 candidate_name,
-                position:position,
+                position: position,
                 feedback
             }
         }
@@ -119,24 +119,30 @@ Resume text: ${resumeContent}`
             })
         });
 
-        const aiResponse: string = await this.chatService.getAiResponse({
-            prompt: evaluationPrompt({
-                experience,
-                interview_type,
-                resume_summary,
-                position,
-            } as SystemPromptInput),
-            role: "system",
-            messageContext
+        let aiResponse: string=''
+        if (messageContext.length) {
+            aiResponse = await this.chatService.getAiResponse({
+                prompt: evaluationPrompt({
+                    experience,
+                    interview_type,
+                    resume_summary,
+                    position,
+                    language
+                } as SystemPromptInput),
+                role: "system",
+                messageContext
 
-        })
+            })
+        } else {
+            aiResponse = `You have not taken the interview so can't provide you any feedback.`
+        }
 
-        await InterviewService.updateInterview(interviewId,{feedback: aiResponse})
+        await InterviewService.updateInterview(interviewId, { feedback: aiResponse })
 
         return {
-                candidate_name,
-                position:position,
-                feedback:aiResponse
+            candidate_name,
+            position: position,
+            feedback: aiResponse
         };
 
 

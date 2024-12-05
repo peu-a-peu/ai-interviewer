@@ -1,5 +1,5 @@
 'use client';
-import {  useRef, useState } from "react";
+import {  useEffect, useRef, useState } from "react";
 import clsx from 'clsx';
 import Search from "public/svgs/search";
 import Loader from "./Loader";
@@ -57,6 +57,11 @@ export default function Select<T>(props: SelectProps<T>) {
             label:search
         })
       }
+
+      useEffect(()=>{
+        setSelection(selection)
+        setSearch(selected?.label||"")
+      },[selected])
   
     return <>
         <div className= {clsx(disabled ? "bg-gray-100 border-gray-400":"","border border-gray-300 px-4 py-3 rounded-md text-lg font-semibold relative")}>
