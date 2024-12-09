@@ -1,18 +1,24 @@
 import { db } from "@/server/db"
 import { question } from "@/server/db/schema"
 import { Interview } from "@/server/interfaces/drizzle"
-import { and, eq, sql } from "drizzle-orm"
+import { QuestionOutput } from "@/server/interfaces/question"
+import { and, eq, isNull, lte, or, sql } from "drizzle-orm"
+
 
 class QuestionsRepository{
-    static async getQuestionsForCompany(currentInterview:Interview, limit:number):Promise<string[]>{
-        return (await db.select({question: question.question})
+    static async getQuestions(currentInterview:Interview, limit:number):Promise<QuestionOutput[]>{
+        return (await db.select({id: question.question_id, question: question.question, images: question.images})
         .from(question)
         .where(and(
-            eq(question.company_id, currentInterview.company_id),
+            or(
+                isNull(question.company_id), // Include questions where company_id is NULL
+                eq(question.company_id, currentInterview.company_id) // Or where company_id matches
+            ),
             eq(question.position, currentInterview.position as string),
             eq(question.interview_type, currentInterview.interview_type as string),
+            lte(question.experience_level, currentInterview.experience as number)
         ))
-        .limit(limit)).map((q)=>q.question)
+        .limit(limit))
     }
 
     static async getDistinctRolesForCompany(companyId:string):Promise<string[]>{

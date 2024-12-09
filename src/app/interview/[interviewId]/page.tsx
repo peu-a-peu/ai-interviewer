@@ -11,6 +11,7 @@ import { api } from "@/trpc/react";
 import Lottie from "react-lottie-player";
 import SpeakingAnimation from "../../lotties/speaking.json";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 export default function ViewPage({
   params,
@@ -20,6 +21,7 @@ export default function ViewPage({
   const t = useTranslations();
   const { interviewId } = params;
   const mutation = api.interview.closeInterview.useMutation();
+  const { data, refetch } = api.interview.getInterview.useQuery({ interview_id: interviewId }, { enabled: false })
   const router = useRouter();
   const {
     recordingStatus,
@@ -45,6 +47,10 @@ export default function ViewPage({
     },
   });
 
+  const [questionData, setQuestionData] = useState({
+    question: " Explain the importance of database indexing in a backend system",
+    images: "https://cokmuffbcpjwcxfoedtr.supabase.co/storage/v1/object/public/company_logos/Google_2015_logo.svg.png"
+  })
   function closeModal(modalName: string) {
     showModals((prev: any) => ({
       ...prev,
@@ -76,7 +82,11 @@ export default function ViewPage({
         openModal("error", res.message);
       }
 
-      const isOver = response.headers.get("interview-over") == "Y";
+
+      const metadata = JSON.parse(response.headers.get("metadata") || "{}")
+      let { isOver, question, images } = metadata;
+      setQuestionData({ question, images })
+      isOver = response.headers.get("interview-over") == "Y";
       // Convert the response to a Blob
       const audioBlob = await response.blob();
 
@@ -106,12 +116,15 @@ export default function ViewPage({
       stopRecording();
       audio.play();
       // Play the audio
+      const data = await response.json()
+      console.log({ PPPPPPPP: data })
       return () => {
         audio.removeEventListener("ended", onEnded);
         // Optionally revoke the object URL to free up resources
         URL.revokeObjectURL(audioUrl);
       };
-    } catch (err) {}
+
+    } catch (err) { }
   }
 
   function handleMicClick() {
@@ -123,6 +136,11 @@ export default function ViewPage({
   }
 
   useEffect(() => {
+    if (interviewId) {
+      refetch()
+    }
+  }, [interviewId])
+  useEffect(() => {
     getQuestion(interviewId, audioBlob as Blob);
   }, [interviewId, audioBlob]);
 
@@ -130,22 +148,48 @@ export default function ViewPage({
     await mutation.mutateAsync({ interviewId });
     router.replace(`/feedback/${interviewId}`);
   }
+
+  let position = data?.position || ""
+  position = position.replace(/_/g, ' ')
+  position = position[0]?.toUpperCase() + position.slice(1)
+  let { question, images } = questionData
+  const imageArray = (images.split(',') || []).filter((item) => !!item)
+  const hasImages = imageArray.length != 0
+  console.log({ hasImages })
   return (
     <div>
-      <section className="relative max-w-sm mx-auto h-[calc(100vh-60px)] py-12 px-3 flex flex-col justify-center items-center">
-        <Lottie
-          className="bottom-16 relative"
-          loop
-          animationData={SpeakingAnimation}
-          play
-          style={{ width: 150, height: 150 }}
-        />
-        {showText && (
-          <p className="text-sm text-center text-black font-medium">
-            {t(`You can start speaking now`)}
-          </p>
-        )}
-        <div className="absolute left-0 px-4 bottom-8 flex justify-between w-full">
+      <section className="relative max-w-xl mx-auto h-[calc(100vh-60px)] py-6 px-3 flex flex-col justify-between items-center">
+        <div className="h-24 text-center font-semibold !leading-none">
+          {data && <>
+          <p className="text-gray-600">{t(`Interview in progress`)}</p>
+          <h3 className="mt-5 text-black text-2xl">{data?.candiateName}</h3>
+          <p className="text-gray-700 mt-3">{data?.companyName} / {position}</p>
+          </>}
+        </div>
+        <div className="text-center flex flex-col items-center max-w-md">
+          {hasImages ? imageArray.map((image) => (
+            <div style={{ position: 'relative', width: '100%', height: '200px' }}>
+            <Image
+              src={image}
+              alt="Question image"
+              layout="fill"
+              objectFit="contain" // or "contain"
+            />
+          </div>)) : <Lottie
+            className="bottom-16 relative"
+            loop
+            animationData={SpeakingAnimation}
+            play
+            style={{ width: 150, height: 150 }}
+          />}
+          <p className={clsx("text-gray-600", !hasImages ? "-mt-12" : "mt-4")}>{question}</p>
+          {showText && (
+            <p className="text-lg my-6 text-center font-medium text-gray-700">
+              {t(`You can start speaking now`)}
+            </p>
+          )}
+        </div>
+        <div className="md:max-w-60 px-4 bottom-8 flex justify-between w-full">
           <div
             className={clsx(
               recordingStatus === "inactive"

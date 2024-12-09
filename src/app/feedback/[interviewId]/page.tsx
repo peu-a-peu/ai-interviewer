@@ -21,8 +21,11 @@ export default async function FeedbackPage({
     return <h1>Nothing to show here</h1>;
   }
   let summary: any;
+  summary = data?.feedback || ""
+  const jsonRegex = /\{.*\}/s;
+  const jsonString = summary.match(jsonRegex)[0];
   try {
-    summary = JSON.parse(data?.feedback || "{}") || {};
+    summary = JSON.parse(jsonString || "{}") || {}
   } catch (err) {
     summary = data?.feedback || ""
   }

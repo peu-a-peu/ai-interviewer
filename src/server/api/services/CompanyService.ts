@@ -10,6 +10,10 @@ class CompanyService {
     static async getAllRolesForCompany(companyId:string){
         return await QuestionsRepository.getDistinctRolesForCompany(companyId)
     }
+
+    static async getCompanyById(companyId:string){
+        return await CompanyRepository.getCompanyById(companyId)
+    }
 }
 
 export default CompanyService

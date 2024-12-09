@@ -8,7 +8,6 @@ import SearchWithSelect, { Option } from "../ui/SearchWithSelect";
 import { api } from "@/trpc/react";
 import { z } from "zod";
 import clsx from "clsx";
-import Select from "../ui/Select";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
@@ -18,28 +17,61 @@ import Checkbox from "../ui/Checkbox";
 
 export default function StartInterviewForm({ }) {
   const t = useTranslations();
-  const ROLES = {
-    [t("Administrative Assistant")]: "administrative_assistant",
-    [t("Back-End Engineer")]: "back_end_engineer",
-    [t("Business Analyst")]: "business_analyst",
-    [t("Business Development Manager")]: "business_development_manager",
-    [t("Customer Support Specialist")]: "customer_support_specialist",
-    [t("Finance Manager")]: "finance_manager",
-    [t("Front-End Engineer")]: "front_end_engineer",
-    [t("Graphic Designer")]: "graphic_designer",
-    [t("Human Resources Specialist")]: "human_resources_specialist",
-    [t("Marketing Specialist")]: "marketing_specialist",
-    [t("Product Manager")]: "product_manager",
-    [t("Quality Assurance (QA)")]: "quality_assurance",
-    [t("Research and Development (R&D)")]: "research_and_development",
-    [t("Sales Representative")]: "sales_representative",
-    [t("Software Engineer")]: "software_engineer",
-    [t("Product Designer")]: "product_designer",
-    [t("Full-Stack Engineer")]: "full_stack_engineer",
+
+  const ROLE_CATEGORIES = {
+    [t("Software Engineering")]: 'software_engineering',
+    [t("Product and Design")]: 'product_and_design',
+    [t("Business and Operation")]: 'business_and_operation',
   };
 
-  const roleKeys = Object.keys(ROLES);
-  const roleValues = Object.values(ROLES);
+  const ROLES_BY_CATEGORY:Record<string,Record<string,string>> = {
+    'software_engineering': {
+      [t("Frontend Engineer")]: "frontend_engineer",
+      [t("Backend Engineer")]: "backend_engineer",
+      [t("Fullstack Engineer")]: "fullstack_engineer",
+      [t("Android Engineer")]: "android_engineer",
+      [t("iOS Engineer")]: "ios_engineer",
+      [t("DevOps Engineer")]: "devops_engineer",
+      [t("Site Reliability Engineer (SRE)")]: "site_reliability_engineer",
+      [t("Data Engineer")]: "data_engineer",
+      [t("Machine Learning (ML) Engineer")]: "machine_learning_engineer",
+      [t("Artificial Intelligence (AI) Engineer")]: "ai_engineer",
+      [t("Security Engineer")]: "security_engineer",
+      [t("Software Architect")]: "software_architect",
+      [t("Database Engineer")]: "database_engineer",
+      [t("Network Engineer")]: "network_engineer",
+      [t("System Engineer")]: "system_engineer",
+      [t("Cloud Engineer")]: "cloud_engineer",
+      [t("Embedded Systems Engineer")]: "embedded_systems_engineer",
+      [t("Game Engineer")]: "game_engineer",
+      [t("Blockchain Engineer")]: "blockchain_engineer",
+      [t("AR/VR Engineer")]: "ar_vr_engineer",
+    },
+    'product_and_design': {
+      [t("Product Manager")]: "product_manager",
+      [t("Product Designer")]: "product_designer",
+      [t("Graphic Designer")]: "graphic_designer",
+      [t("UX Designer")]: "ux_designer",
+      [t("Technical Program Manager")]: "technical_program_manager",
+    },
+    'business_and_operation': {
+      [t("Business Development Manager")]: "business_development_manager",
+      [t("Product Operations Manager")]: "product_operations_manager",
+      [t("Marketing Specialist")]: "marketing_specialist",
+      [t("Sales Representative")]: "sales_representative",
+      [t("Business Analyst")]: "business_analyst",
+      [t("Data Analyst")]: "data_analyst",
+      [t("Data Scientist")]: "data_scientist",
+      [t("Customer Support Specialist")]: "customer_support_specialist",
+      [t("Human Resources Specialist")]: "human_resources_specialist",
+      [t("Finance Manager")]: "finance_manager",
+      [t("Administrative Assistant")]: "administrative_assistant",
+    },
+  };
+
+  const roleCategoryKeys = Object.keys(ROLE_CATEGORIES)
+  const roleKeys = Object.keys(roleCategoryKeys);
+  const roleValues = Object.values(roleCategoryKeys);
   const roleOptions: Option[] = roleKeys.map((item, index) => ({
     id: roleValues[index]!,
     value: roleValues[index],
@@ -55,6 +87,7 @@ export default function StartInterviewForm({ }) {
     interview_type: z
       .string()
       .min(1, { message: t("Select an interview type") }),
+    category_type: z.string().optional(),
     resume_summary: z.string(),
     position: z
       .string()
@@ -68,6 +101,7 @@ export default function StartInterviewForm({ }) {
     company_id: "",
     experience: NaN,
     interview_type: "",
+    category_type: "",
     resume_summary: "",
     position: "",
   };
@@ -84,12 +118,14 @@ export default function StartInterviewForm({ }) {
   const [acceptTerms, setAcceptTerms] = useState(true);
   const [showTerms, setShowTerms] = useState(false);
 
-  let interviewTypes = ["capability_interview", "behavioral_interview"];
-  let interviewTypesText = [
+  const interviewTypes = ["capability_interview", "behavioral_interview"];
+  const interviewTypesText = [
     t("Capability Interview"),
     t("Behavioral Interview"),
   ];
 
+
+  const roleCategories = [""]
   useEffect(() => {
     const userEmail = localStorage.getItem("userEmail");
     const token = localStorage.getItem("emailVerificationToken");
@@ -153,17 +189,11 @@ export default function StartInterviewForm({ }) {
     }
   }
 
-  async function createInterview(formData: FormData) {
+  async function createInterview() {
     try {
       // Skip validation if no tickets or no user email
       if (!userEmail || userData?.user?.ticketCount === 0) {
         setShowPaymentModal(true);
-        return;
-      }
-
-      // Only validate if user has tickets and is logged in
-      const validatedData = validate();
-      if (!validatedData) {
         return;
       }
 
@@ -207,8 +237,12 @@ export default function StartInterviewForm({ }) {
   const handleModalConfirm = async () => {
     try {
       setLoading(true);
+      const summary = await extractText();
+      handleChange("resume_summary", summary);
+      
+      const {category_type, ...rest} = formData
       let data = await apiUtil.interview.createInterview.fetch({
-        ...formData,
+        ...rest,
       });
       router.push(`/interview/${data}`);
       localStorage.removeItem("formData");
@@ -228,26 +262,11 @@ export default function StartInterviewForm({ }) {
       return;
     }
 
-    // Skip validation if user has no tickets
-    if (!userEmail || userData?.user?.ticketCount === 0) {
-      const summary = await extractText();
-      handleChange("resume_summary", summary);
-      createInterview({
-        ...formData,
-        resume_summary: summary || "",
-      });
-      return;
-    }
-
-    // Proceed with validation for users with tickets
     const data: FormData | null = validate();
     if (data) {
       setLoading(true);
-      const summary = await extractText();
-      handleChange("resume_summary", summary);
-      data.resume_summary = summary || "";
       localStorage.setItem("agreed", "agreed")
-      createInterview(data);
+      createInterview();
     }
   }
 
@@ -310,8 +329,8 @@ export default function StartInterviewForm({ }) {
           />
         </div>
         <div>
-          <Label>{t(`Job title`)}</Label>
-          <Select
+          <Label error={formErrors?.position}>{t(`Position Applying For`)}</Label>
+          {/* <Select
             selected={roleOptions.find((item) => item.value === formData.position)}
             allowSearchToBeValue
             error={formErrors?.position}
@@ -320,7 +339,37 @@ export default function StartInterviewForm({ }) {
             onOptionClick={(option) => {
               handleChange("position", option.value);
             }}
-          />
+          /> */}
+          <div className="flex gap-2.5">
+            {roleCategoryKeys.map((item, index) => (
+              <Chip
+                extraClass={clsx(
+                  "cursor-pointer",
+                  formData.category_type === ROLE_CATEGORIES[item] ? "!bg-black text-white" : ""
+                )}
+                onClick={() => handleChange("category_type", ROLE_CATEGORIES[item] as string)}
+                key={index}
+              >
+                {item}
+              </Chip>
+            ))}
+          </div>
+          <hr className="my-6"/>
+          <div className="flex flex-wrap gap-2.5">
+            {formData.category_type && Object.keys(ROLES_BY_CATEGORY[formData.category_type]!).map((item,index) => (
+              <Chip
+                extraClass={clsx(
+                  "cursor-pointer bg-white border border-gray-300",
+                  formData.position === (ROLES_BY_CATEGORY[formData.category_type!]![item]) ? "!border-black border-2" : ""
+                )}
+                onClick={() => handleChange("position", ROLES_BY_CATEGORY[formData.category_type!]![item]!)}
+                key={index}
+              >
+                {item}
+              </Chip>
+
+            ))}
+          </div>
         </div>
         <div>
           <Label>{t(`Total job experience`)}</Label>
@@ -390,19 +439,19 @@ export default function StartInterviewForm({ }) {
               ? t("Experience a mock interview for free once")
               : t("Conduct a mock interview")}
         </Button>
-          {showTerms && <div className="flex items-start gap-2">
-            <Checkbox
-              id="terms"
-              checked={acceptTerms}
-              onChange={(e) => setAcceptTerms(e.target.checked)}
-            />
-            <label htmlFor="terms" className="text-sm text-gray-600">
-              {t(
-                "I agree to the collection of data necessary to prevent duplicate use of the free trial service"
-              )}{" "}
-              
-            </label>
-          </div>}
+        {showTerms && <div className="flex items-start gap-2">
+          <Checkbox
+            id="terms"
+            checked={acceptTerms}
+            onChange={(e) => setAcceptTerms(e.target.checked)}
+          />
+          <label htmlFor="terms" className="text-sm text-gray-600">
+            {t(
+              "I agree to the collection of data necessary to prevent duplicate use of the free trial service"
+            )}{" "}
+
+          </label>
+        </div>}
       </form>
 
       <ConfirmModal

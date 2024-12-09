@@ -9,7 +9,7 @@ import {
 import { verificationTokens } from "../db/schema/verificationToken";
 
 export type Company = InferSelectModel<typeof company> & {
-  metadata: Record<string, any> | undefined;
+  metadata: Record<string, any> | undefined | unknown;
 };
 export type NewCompany = InferInsertModel<typeof company> & {
   metadata?: Record<string, any> | undefined;
