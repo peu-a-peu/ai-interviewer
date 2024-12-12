@@ -30,7 +30,7 @@ export const ticketRouter = createTRPCRouter({
       const transactions = await ctx.db
         .select()
         .from(ticketTransactions)
-        .where(eq(ticketTransactions.userId, user.userId))
+        .where(eq(ticketTransactions.userId, user.id))
         .orderBy(desc(ticketTransactions.createdAt));
 
       return { transactions };
@@ -60,7 +60,7 @@ export const ticketRouter = createTRPCRouter({
       const transactions = await ctx.db
         .select()
         .from(ticketTransactions)
-        .where(eq(ticketTransactions.userId, user.userId))
+        .where(eq(ticketTransactions.userId, user.id))
         .orderBy(desc(ticketTransactions.createdAt));
 
       return {

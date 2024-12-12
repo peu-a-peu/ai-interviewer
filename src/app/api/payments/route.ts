@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         if (user) {
           // Store payment transaction
           await db.insert(TransactionDetails).values({
-            userId: user.userId,
+            userId: user.id,
             orderId: data.orderId,
             orderName: data.orderName,
             paymentKey: data.paymentKey,

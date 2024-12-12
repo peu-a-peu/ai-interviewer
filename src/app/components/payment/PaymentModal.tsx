@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // email: string;
+  email: string;
   //   t: (key: string) => string;
 }
 
@@ -21,14 +21,8 @@ interface PaymentTier {
   interviews: number;
 }
 
-export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, email }: PaymentModalProps) {
   const [locale, setLocale] = useState("en");
-  const [email, setEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    setEmail(localStorage.getItem("userEmail"));
-  }, []);
-
   useEffect(() => {
     async function fetchLocale() {
       const userLocale = await getUserLocale();
@@ -44,7 +38,6 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
     { price: 23000, originalPrice: 30000, interviews: 10, discount: "23" },
   ];
   const t = useTranslations();
-
   const handlePayment = async (tier: PaymentTier) => {
     try {
       if (locale === "ko") {

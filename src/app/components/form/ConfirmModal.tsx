@@ -7,12 +7,14 @@ interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  userId: string;
 }
 
 export default function ConfirmModal({
   isOpen,
   onClose,
   onConfirm,
+  userId
 }: ConfirmModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations();
@@ -22,11 +24,6 @@ export default function ConfirmModal({
   const handleConfirm = async () => {
     try {
       setIsLoading(true);
-      const userEmail = localStorage.getItem("userEmail");
-
-      if (!userEmail) {
-        throw new Error("User email not found");
-      }
 
       const response = await fetch("/api/use-ticket", {
         method: "POST",
@@ -34,7 +31,7 @@ export default function ConfirmModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: userEmail,
+          userId,
         }),
       });
 

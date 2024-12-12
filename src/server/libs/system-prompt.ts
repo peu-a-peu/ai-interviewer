@@ -35,9 +35,9 @@ export function languagePrompt(language: string) {
 export function questionsPrompt(questions: QuestionOutput[]) {
     let prompt="\n These are the questions that you have to ask the candidate."
     questions.forEach(({question, id},index)=>{
-        prompt+=`\n ${index+1}.${question} (${id})`
+        prompt+=`\n ${index+1}.${question} {{${id}}}`
     })
-    prompt+=`\n IMPORTANT (ALWAYS ADEHERE TO THIS RULE ):  Within your response wrap the question in special characters like this: << question (id) >>. For example: Given the question "1. How are you (EFJKL)", you must return the following format: << How are you (EFJKL) >>.
+    prompt+=`\n IMPORTANT (ALWAYS ADEHERE TO THIS RULE ):  Within your response wrap the question in special characters like this: << question {{id}} >>. For example: "<< How are you {{EFJKL}} >>".
 `
     return prompt;
 }

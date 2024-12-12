@@ -8,6 +8,9 @@ import { verificationTokens } from "./verificationToken";
 import { users } from "./user";
 import { ticketTransactions } from "./ticketTransaction";
 import { TransactionDetails } from "./transaction";
+import { accounts } from "./accounts";
+import { sessions } from "./sessions";
+import { nextAuthVerificationToken } from "./nextAuthVerificationToken";
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
  * database instance for multiple projects.
@@ -98,3 +101,6 @@ export { verificationTokens } from "./verificationToken";
 export { users } from "./user";
 export { ticketTransactions } from "./ticketTransaction";
 export { TransactionDetails } from "./transaction";
+export { accounts } from "./accounts"
+export {sessions} from "./sessions"
+export {nextAuthVerificationToken} from "./nextAuthVerificationToken"

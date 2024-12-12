@@ -14,10 +14,12 @@ import { DEFAULT_COMPANY_IMAGE } from "@/app/constants/values";
 import ConfirmModal from "./ConfirmModal";
 import PaymentModal from "../payment/PaymentModal";
 import Checkbox from "../ui/Checkbox";
+import { useSession } from "next-auth/react";
 
 export default function StartInterviewForm({ }) {
   const t = useTranslations();
-
+  const {data,status,update} = useSession()
+  const isAuthenticated = status==='authenticated'
   const ROLE_CATEGORIES = {
     [t("Software Engineering")]: 'software_engineering',
     [t("Product and Design")]: 'product_and_design',
@@ -91,7 +93,7 @@ export default function StartInterviewForm({ }) {
     resume_summary: z.string(),
     position: z
       .string()
-      .min(1, { message: t("Enter position for which you are applying for") }),
+      .min(1, { message: t("Select position for which you are applying for") }),
   });
 
   type FormData = z.infer<typeof formSchema>;
@@ -114,7 +116,6 @@ export default function StartInterviewForm({ }) {
   const [file, setFile] = useState<File>();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(true);
   const [showTerms, setShowTerms] = useState(false);
 
@@ -127,31 +128,15 @@ export default function StartInterviewForm({ }) {
 
   const roleCategories = [""]
   useEffect(() => {
-    const userEmail = localStorage.getItem("userEmail");
-    const token = localStorage.getItem("emailVerificationToken");
-    const expires = localStorage.getItem("sessionExpires");
+
     const agreed = localStorage.getItem("agreed")
-    if (userEmail && token && expires && new Date(expires) > new Date()) {
-      setUserEmail(userEmail);
-    }
+  
     if (!agreed) {
       setAcceptTerms(false)
       setShowTerms(true)
     }
   }, []);
 
-  const { data: userData, error: userDataError } =
-    api.ticket.getTransactionData.useQuery(
-      { email: userEmail ?? "" },
-      {
-        enabled: !!userEmail,
-        refetchOnWindowFocus: false,
-        retry: 1,
-        // onError: (error) => {
-        //   console.error("Error fetching user data:", error);
-        // },
-      }
-    );
 
   async function handleSearch(query: string): Promise<Option[]> {
     try {
@@ -192,7 +177,13 @@ export default function StartInterviewForm({ }) {
   async function createInterview() {
     try {
       // Skip validation if no tickets or no user email
-      if (!userEmail || userData?.user?.ticketCount === 0) {
+      if (!isAuthenticated) {
+        localStorage.setItem("agreed", "agreed")
+        handleLoginRedirect();
+        return;
+      }
+  
+      if (!isAuthenticated || data?.user?.ticketCount === 0) {
         setShowPaymentModal(true);
         return;
       }
@@ -218,7 +209,6 @@ export default function StartInterviewForm({ }) {
   useEffect(() => {
     const savedFormData = localStorage.getItem("formData");
     const savedCompany = localStorage.getItem("company")
-    console.log({ savedCompany })
     if (savedFormData) {
       const parsedData = JSON.parse(savedFormData);
       setFormData((prev) => ({
@@ -244,6 +234,7 @@ export default function StartInterviewForm({ }) {
       let data = await apiUtil.interview.createInterview.fetch({
         ...rest,
       });
+      await update()
       router.push(`/interview/${data}`);
       localStorage.removeItem("formData");
     } catch (err) {
@@ -255,13 +246,7 @@ export default function StartInterviewForm({ }) {
   };
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!userEmail) {
-      localStorage.setItem("agreed", "agreed")
-      handleLoginRedirect();
-      return;
-    }
-
+    e.preventDefault()
     const data: FormData | null = validate();
     if (data) {
       setLoading(true);
@@ -433,9 +418,9 @@ export default function StartInterviewForm({ }) {
           disabled={!acceptTerms}
           extraClasses="disabled:opacity-50"
         >
-          {userData?.user?.ticketCount === 0
+          {data?.user?.ticketCount === 0
             ? t("Please purchase a ticket for the mock interview")
-            : userData?.user?.ticketCount === 1
+            : data?.user?.ticketCount === 1
               ? t("Experience a mock interview for free once")
               : t("Conduct a mock interview")}
         </Button>
@@ -458,13 +443,13 @@ export default function StartInterviewForm({ }) {
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleModalConfirm}
-      // userEmail={formData.candidate_name}
+        userId={data?.user.id||""}
       />
 
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-      // email={formData.candidate_name}
+        email={data?.user.email||""}
       />
     </>
   );

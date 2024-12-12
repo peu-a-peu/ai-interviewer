@@ -10,9 +10,9 @@ export const TransactionDetails = pgTable("transactionLog", {
   transactionId: integer("transactionId")
     .primaryKey()
     .generatedAlwaysAsIdentity(),
-  userId: integer("userId")
+  userId: varchar("userId")
     .notNull()
-    .references(() => users.userId),
+    .references(() => users.id),
   orderId: varchar("orderId", { length: 100 }).notNull(),
   orderName: varchar("orderName", { length: 100 }).notNull(),
   paymentKey: varchar("paymentKey", { length: 200 }).notNull(),

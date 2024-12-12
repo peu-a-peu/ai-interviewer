@@ -79,12 +79,16 @@ export default function ViewPage({
 
       if (response.status !== 200) {
         const res = await response.json();
+        if(response.status==404){
+          router.replace(`/`);
+          return;
+        }
         openModal("error", res.message);
       }
 
 
       const metadata = JSON.parse(response.headers.get("metadata") || "{}")
-      let { isOver, question, images } = metadata;
+      let { isOver, question, images="" } = metadata;
       setQuestionData({ question, images })
       isOver = response.headers.get("interview-over") == "Y";
       // Convert the response to a Blob
@@ -158,7 +162,7 @@ export default function ViewPage({
   console.log({ hasImages })
   return (
     <div>
-      <section className="relative max-w-xl mx-auto h-[calc(100vh-60px)] py-6 px-3 flex flex-col justify-between items-center">
+      <section className="relative max-w-xl mx-auto body-height py-6 px-3 flex flex-col justify-between items-center">
         <div className="h-24 text-center font-semibold !leading-none">
           {data && <>
           <p className="text-gray-600">{t(`Interview in progress`)}</p>
