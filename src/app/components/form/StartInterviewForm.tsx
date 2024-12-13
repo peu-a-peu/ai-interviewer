@@ -15,18 +15,19 @@ import ConfirmModal from "./ConfirmModal";
 import PaymentModal from "../payment/PaymentModal";
 import Checkbox from "../ui/Checkbox";
 import { useSession } from "next-auth/react";
+import { toast } from "react-toast";
 
 export default function StartInterviewForm({ }) {
   const t = useTranslations();
-  const {data,status,update} = useSession()
-  const isAuthenticated = status==='authenticated'
+  const { data, status, update } = useSession()
+  const isAuthenticated = status === 'authenticated'
   const ROLE_CATEGORIES = {
     [t("Software Engineering")]: 'software_engineering',
     [t("Product and Design")]: 'product_and_design',
     [t("Business and Operation")]: 'business_and_operation',
   };
 
-  const ROLES_BY_CATEGORY:Record<string,Record<string,string>> = {
+  const ROLES_BY_CATEGORY: Record<string, Record<string, string>> = {
     'software_engineering': {
       [t("Frontend Engineer")]: "frontend_engineer",
       [t("Backend Engineer")]: "backend_engineer",
@@ -72,13 +73,7 @@ export default function StartInterviewForm({ }) {
   };
 
   const roleCategoryKeys = Object.keys(ROLE_CATEGORIES)
-  const roleKeys = Object.keys(roleCategoryKeys);
-  const roleValues = Object.values(roleCategoryKeys);
-  const roleOptions: Option[] = roleKeys.map((item, index) => ({
-    id: roleValues[index]!,
-    value: roleValues[index],
-    label: item,
-  }));
+ 
   const formSchema = z.object({
     candidate_name: z.string().min(1, { message: t("Name is required") }),
     company_id: z.string().min(1, { message: t("Company is required") }),
@@ -97,11 +92,11 @@ export default function StartInterviewForm({ }) {
   });
 
   type FormData = z.infer<typeof formSchema>;
-
   const initialState: FormData = {
     candidate_name: "",
     company_id: "",
-    experience: NaN,
+    //@ts-ignore
+    experience: "",
     interview_type: "",
     category_type: "",
     resume_summary: "",
@@ -130,7 +125,7 @@ export default function StartInterviewForm({ }) {
   useEffect(() => {
 
     const agreed = localStorage.getItem("agreed")
-  
+
     if (!agreed) {
       setAcceptTerms(false)
       setShowTerms(true)
@@ -182,7 +177,7 @@ export default function StartInterviewForm({ }) {
         handleLoginRedirect();
         return;
       }
-  
+
       if (!isAuthenticated || data?.user?.ticketCount === 0) {
         setShowPaymentModal(true);
         return;
@@ -203,6 +198,27 @@ export default function StartInterviewForm({ }) {
     if (selected) {
       localStorage.setItem("company", JSON.stringify(selected))
     }
+    if (file) {
+      const request = indexedDB.open("fileStore", 1);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains("files")) {
+          db.createObjectStore("files", { keyPath: "id" });
+        }
+      };
+
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction("files", "readwrite");
+        const store = transaction.objectStore("files");
+        store.add({id:'user_uploaded_resume', file});
+      };
+
+      request.onerror = (e) => {
+        console.error("Error opening IDB:");
+      };
+    }
     router.push("/login");
   };
 
@@ -221,6 +237,29 @@ export default function StartInterviewForm({ }) {
       setSelected(JSON.parse(savedCompany))
       localStorage.removeItem("company")
     }
+    const request = indexedDB.open("fileStore", 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction("files", "readwrite");
+      const store = transaction.objectStore("files");
+
+      const getRequest = store.get('user_uploaded_resume');
+
+      getRequest.onsuccess = () => {
+        const file = getRequest.result;
+        console.log({file})
+        if (file) {
+          setFile(file.file)
+          store.delete('user_uploaded_resume');  // Replace `1` with the actual file ID
+        }
+      };
+
+    };
+
+    request.onerror = (e) => {
+      console.error("Error opening IDB:");
+    };
 
   }, []);
 
@@ -229,15 +268,21 @@ export default function StartInterviewForm({ }) {
       setLoading(true);
       const summary = await extractText();
       handleChange("resume_summary", summary);
-      
-      const {category_type, ...rest} = formData
-      let data = await apiUtil.interview.createInterview.fetch({
+
+      const { category_type, ...rest } = formData
+      let interviewId = await apiUtil.interview.createInterview.fetch({
         ...rest,
+        resume_summary: summary,
+        candidate_id: data?.user.id||""
       });
-      await update()
-      router.push(`/interview/${data}`);
-      localStorage.removeItem("formData");
+      if(interviewId){
+        toast.success(t(`Interview created successfully`))
+        await update()
+        router.push(`/interview/${interviewId}`);
+        localStorage.removeItem("formData");
+      }
     } catch (err) {
+      toast.error(t("Failed to create interview"))
       console.log(err);
     } finally {
       setLoading(false);
@@ -262,6 +307,7 @@ export default function StartInterviewForm({ }) {
 
   function selectFile(e: any) {
     const file = e.target.files?.[0];
+    console.log(file)
     setFile(file);
   }
 
@@ -325,11 +371,11 @@ export default function StartInterviewForm({ }) {
               handleChange("position", option.value);
             }}
           /> */}
-          <div className="flex gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
             {roleCategoryKeys.map((item, index) => (
               <Chip
                 extraClass={clsx(
-                  "cursor-pointer",
+                  "cursor-pointer flex-grow",
                   formData.category_type === ROLE_CATEGORIES[item] ? "!bg-black text-white" : ""
                 )}
                 onClick={() => handleChange("category_type", ROLE_CATEGORIES[item] as string)}
@@ -339,13 +385,13 @@ export default function StartInterviewForm({ }) {
               </Chip>
             ))}
           </div>
-          <hr className="my-6"/>
+          <hr className="my-6" />
           <div className="flex flex-wrap gap-2.5">
-            {formData.category_type && Object.keys(ROLES_BY_CATEGORY[formData.category_type]!).map((item,index) => (
+            {formData.category_type && Object.keys(ROLES_BY_CATEGORY[formData.category_type]!).map((item, index) => (
               <Chip
                 extraClass={clsx(
                   "cursor-pointer bg-white border border-gray-300",
-                  formData.position === (ROLES_BY_CATEGORY[formData.category_type!]![item]) ? "!border-black border-2" : ""
+                  formData.position === (ROLES_BY_CATEGORY[formData.category_type!]![item]) ? "!bg-black text-white" : ""
                 )}
                 onClick={() => handleChange("position", ROLES_BY_CATEGORY[formData.category_type!]![item]!)}
                 key={index}
@@ -443,13 +489,12 @@ export default function StartInterviewForm({ }) {
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleModalConfirm}
-        userId={data?.user.id||""}
+        userId={data?.user.id || ""}
       />
 
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        email={data?.user.email||""}
       />
     </>
   );

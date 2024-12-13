@@ -46,6 +46,7 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY: z.string(),
+    NEXT_PUBLIC_CHANNEL_IO_PLUGIN_KEY: z.string()
   },
 
   /**
@@ -69,6 +70,8 @@ export const env = createEnv({
     TOSS_PAYMENTS_SECRET_KEY: process.env.TOSS_PAYMENTS_SECRET_KEY,
     NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY:
       process.env.NEXT_PUBLIC_TOSS_PAYMENTS_CLIENT_KEY,
+    NEXT_PUBLIC_CHANNEL_IO_PLUGIN_KEY:
+      process.env.NEXT_PUBLIC_CHANNEL_IO_PLUGIN_KEY
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

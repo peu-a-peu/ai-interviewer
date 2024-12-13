@@ -12,6 +12,7 @@ import Lottie from "react-lottie-player";
 import SpeakingAnimation from "../../lotties/speaking.json";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { toast } from "react-toast";
 
 export default function ViewPage({
   params,
@@ -48,8 +49,8 @@ export default function ViewPage({
   });
 
   const [questionData, setQuestionData] = useState({
-    question: " Explain the importance of database indexing in a backend system",
-    images: "https://cokmuffbcpjwcxfoedtr.supabase.co/storage/v1/object/public/company_logos/Google_2015_logo.svg.png"
+    question: "",
+    images: ""
   })
   function closeModal(modalName: string) {
     showModals((prev: any) => ({
@@ -80,6 +81,8 @@ export default function ViewPage({
       if (response.status !== 200) {
         const res = await response.json();
         if(response.status==404){
+          toast.error(t('Interview does not exists'))
+          toast.info(t('Try creating a new interview'))
           router.replace(`/`);
           return;
         }
@@ -90,7 +93,6 @@ export default function ViewPage({
       const metadata = JSON.parse(response.headers.get("metadata") || "{}")
       let { isOver, question, images="" } = metadata;
       setQuestionData({ question, images })
-      isOver = response.headers.get("interview-over") == "Y";
       // Convert the response to a Blob
       const audioBlob = await response.blob();
 
@@ -150,6 +152,7 @@ export default function ViewPage({
 
   async function closeInterview() {
     await mutation.mutateAsync({ interviewId });
+    toast.success(t("Closed interview successfully"))
     router.replace(`/feedback/${interviewId}`);
   }
 

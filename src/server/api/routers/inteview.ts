@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter,  publicProcedure } from "../trpc";
 
 import InterviewController from "../controllers/InterviewController";
 import { TRPCError } from "@trpc/server";
@@ -10,6 +10,7 @@ export const interviewRouter = createTRPCRouter({
   createInterview: publicProcedure
     .input(z.object({
       candidate_name: z.string(),
+      candidate_id: z.string(),
       company_id: z.string(),
       position: z.string().optional(),
       interview_type: z.string().optional(),

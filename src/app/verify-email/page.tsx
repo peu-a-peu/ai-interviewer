@@ -10,7 +10,7 @@ export default function VerifyEmail() {
           {t("Please check your email")}
         </h2>
         <p className="text-lg mb-4">
-          {t("We have sent an email to the address you provided. Please click the link in the email.")}
+          {t("We have sent an email to the address you provided")}. {t("Please click the link in the email")}.
         </p>
       </div>
     </div>
