@@ -18,6 +18,7 @@
   "dependencies": {
     "@auth/drizzle-adapter": "^1.1.0",
     "@ffmpeg/ffmpeg": "^0.12.10",
+    "@channel.io/channel-web-sdk-loader": "^2.0.0",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@tosspayments/payment-sdk": "^1.9.1",
@@ -47,10 +48,12 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-lottie-player": "^2.1.0",
+    "react-toast": "^1.0.3",
     "server-only": "^0.0.1",
     "superjson": "^2.2.1",
     "ulidx": "^2.4.1",
-    "zod": "^3.23.3"
+    "zod": "^3.23.3",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@types/eslint": "^8.56.10",

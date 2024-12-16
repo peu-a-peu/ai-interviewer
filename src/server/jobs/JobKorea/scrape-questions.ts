@@ -69,7 +69,7 @@ export class QuestionScraper {
             data.push({
                 question_id: ulid(),
                 company_id: this.currentCompany?.company_id,
-                experience_level: ele.find(".sCateWrap .item:nth-child(2)").text().trim(),
+                experience_level: parseInt(ele.find(".sCateWrap .item:nth-child(2)").text().trim()),
                 interview_type: title[0]?.trim(),
                 position: title[1]?.trim(),
                 question: ele.find(".tx").text().trim()

@@ -78,12 +78,12 @@ class VerificationService {
 
       console.log("user: ", user);
 
-      if (!user[0]?.userId) {
+      if (!user[0]?.id) {
         throw new Error("User not found");
       }
 
       await db.insert(ticketTransactions).values({
-        userId: user[0].userId,
+        userId: user[0].id,
         ticketBalanceChange: 1,
         type: "PURCHASE",
         description: "free ticket",

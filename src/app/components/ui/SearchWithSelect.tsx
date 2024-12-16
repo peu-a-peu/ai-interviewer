@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import Search from "public/svgs/search";
 import Loader from "./Loader";
 import useClickOutside from "../hooks/useOutsideClick";
+import { useTranslations } from "next-intl";
 
 interface SearchWithSelectProps<T> {
     searchValue?: string;
@@ -32,20 +33,22 @@ export default function SearchWithSelect<T>(props: SearchWithSelectProps<T>) {
     const timeout = useRef<NodeJS.Timeout | null>(null);
     const [loading, setLoading] = useState(false)
     const [msg, setMsg] = useState('')
-
+    const t = useTranslations()
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useClickOutside(dropdownRef, () => setOpen(false));
 
-    useEffect(() => {
-
-    }, [searchValue])
+    useEffect(()=>{
+        setSelection(selection)
+        setSearch(selected?.label||"")
+      },[selected])
+  
 
     async function callApi(val: string) {
         setLoading(true)
         const options = await onSearch(val)
         if (!options.length) {
-            setMsg("결과를 찾을 수 없습니다: 다른 키워드로 다시 시도해 주세요.")
+            setMsg(t("No results found"))
         } else {
             setMsg("")
         }

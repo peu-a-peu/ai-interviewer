@@ -4,9 +4,9 @@ import InterviewService from "../services/InterviewService";
 import { NewInterview } from "@/server/interfaces/drizzle";
 import CustomError from "@/app/components/utils/CustomError";
 import { evaluationPrompt, getSystemPrompt } from "@/server/libs/system-prompt";
-import { OpenAIContent, SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
 import { AIAudioResponse } from "../services/AiChatService";
-import { EvaluationResponse } from "@/server/interfaces/OpenAiInterface";
+import { EvaluationResponse, SystemPromptInput } from "@/server/interfaces/OpenAiInterface";
+import QuestionsService from "../services/QuestionsService";
 
 class InterviewController {
     static chatService = AiFactory.getChatService()
@@ -15,13 +15,20 @@ class InterviewController {
         return await InterviewService.createInterview(data)
     }
 
+    static async getInterviewById(id:string){
+        return await InterviewService.getInterviewById(id)
+    }
+
     static async getNextQuestion(interviewId: string, audio?: Blob) {
 
         const currentInterview = await InterviewService.getInterviewById(interviewId)
         if (!currentInterview || currentInterview.ended_at) {
             throw new CustomError("Interview not found", 404)
         }
-        const conversations = await InterviewService.getInterviewConversations(interviewId)
+        const [conversations, questions] = await Promise.all([
+            InterviewService.getInterviewConversations(interviewId),
+            QuestionsService.getQuestions(currentInterview)
+        ])
 
 
         const { experience, interview_type, resume_summary, position, created_at, candidate_name, language } = currentInterview
@@ -32,10 +39,15 @@ class InterviewController {
             resume_summary,
             position,
             created_at,
-            language
+            language,
+            questions
         } as SystemPromptInput)
 
-        let lastAns: OpenAIContent = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
+        const imageMap:Record<string,string>={}
+        questions.forEach((item)=>{
+            imageMap[item.id] = item.images||""
+        })
+        let lastAns:any = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
             const buffer = await audio.arrayBuffer();
             const base64str = Buffer.from(buffer).toString("base64");
@@ -53,29 +65,50 @@ class InterviewController {
             })
         });
 
-        console.log(messageContext)
-
-        let aiResponse: AIAudioResponse = await this.chatService.getAiAudioResponse({
-            prompt,
+        let response = await this.chatService.getAiAudioResponse({
             messageContext,
+            prompt,
             role: "system"
         })
 
+        let aiResponse = response.text
 
-
-        const isOver = aiResponse.text.includes("<<END_INTERVIEW>>")
+        console.log({aiResponse})
+        const isOver = aiResponse.includes("<<END_INTERVIEW>>")
         if (isOver) {
             await InterviewService.closeInterview(interviewId)
         }
+        const regex = /<<([^<>]+)>>/;
+        const match = aiResponse.match(regex);
+         let id = '', question=""
+        if (match) {
+            question = match?.[1] || ""
+            if(question){
+                aiResponse = aiResponse.replace('<<','')
+                aiResponse = aiResponse.replace('>>','')
+            }
+            const regex2 = /\(([^()]+)\)/;
+            const match2 = aiResponse.match(regex2)
+            if (match2?.[1]) {
+                id = match2?.[1]?.trim()
+               aiResponse = aiResponse.replace(`(${id})`, '')
+               question = question.replace(`(${id})`, '')
+            }
+            aiResponse.trim()
+        }
 
         await Promise.all([
-            InterviewService.addConversation(interviewId, aiResponse.text),
-            lastConversationId && InterviewService.updateConversation(lastConversationId, aiResponse.id)
+            InterviewService.addConversation(interviewId, response.id),
         ])
-
-
-        return { mp3: aiResponse.base64audio, isOver }
+        console.log({aiResponseClear: aiResponse})
+        let mp3;
+        if (aiResponse) {
+            mp3 = await this.audioService.convertTextToAudio(aiResponse)
+        }
+        return { mp3: response.base64audio, isOver, question, images: imageMap[id]||"" }
     }
+
+     
     static async summarizeResume(resumeContent: string) {
         const prompt = `Extract the candidate's name, total years of experience, industries or domains worked in, and tools and technologies used from the following resume text. Present this information in a single, coherent paragraph of no more than 300 words, ensuring to exclude irrelevant details."
 Resume text: ${resumeContent}`
@@ -98,7 +131,7 @@ Resume text: ${resumeContent}`
         if (!currentInterview) {
             throw new CustomError("Interview not found", 404)
         }
-        const { experience, interview_type, resume_summary, position, candidate_name, feedback } = currentInterview
+        const { experience, interview_type, resume_summary, position, candidate_name, feedback, language } = currentInterview
         if (feedback) {
             return {
                 candidate_name,
@@ -119,26 +152,30 @@ Resume text: ${resumeContent}`
             }
         });
 
-        console.log(messageContext)
+        let aiResponse: any = ''
+        if (messageContext.length) {
+            aiResponse = (await this.chatService.getAiTextResponse({
+                prompt: evaluationPrompt({
+                    experience,
+                    interview_type,
+                    resume_summary,
+                    position,
+                    language
+                } as SystemPromptInput),
+                role: "system",
+                messageContext
 
-        const aiResponse = await this.chatService.getAiTextResponse({
-            prompt: evaluationPrompt({
-                experience,
-                interview_type,
-                resume_summary,
-                position,
-            } as SystemPromptInput),
-            role: "system",
-            messageContext
+            }))?.text
+        } else {
+            aiResponse = `You have not taken the interview so can't provide you any feedback.`
+        }
 
-        })
-
-        await InterviewService.updateInterview(interviewId, { feedback: aiResponse.text })
+        await InterviewService.updateInterview(interviewId, { feedback: aiResponse })
 
         return {
             candidate_name,
             position: position,
-            feedback: aiResponse.text
+            feedback: aiResponse
         };
 
 

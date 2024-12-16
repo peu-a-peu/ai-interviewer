@@ -24,7 +24,7 @@ const companyId = '01J9JMH0X49GV2WPTDNFA234GM'
         if(!position){
             return;
         }
-        const key = `${position?.trim()}%${interview_type?.trim()}%${experience_level?.trim()}`
+        const key = `${position?.trim()}%${interview_type?.trim()}%${experience_level}`
         if(obj[key]){
             obj[key].push(question)
         }else{

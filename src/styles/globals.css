@@ -161,3 +161,7 @@ input[type="number"] {
   height: 100%;
   background-color: #ec1f5d;
 }
+
+.body-height {
+  min-height: calc(100vh - 60px);
+}

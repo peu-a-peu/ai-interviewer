@@ -4,9 +4,9 @@ export const ticketTransactions = pgTable("ticket_transactions", {
   transactionId: integer("transactionId")
     .primaryKey()
     .generatedAlwaysAsIdentity(),
-  userId: integer("userId")
+  userId: varchar("userId")
     .notNull()
-    .references(() => users.userId),
+    .references(() => users.id),
   ticketBalanceChange: integer("ticketBalanceChange").notNull(), // Positive for additions, negative for consumption
   type: varchar("type", { length: 50 }).notNull(), // "PURCHASE", "CONSUMPTION", etc.
   description: varchar("description", { length: 255 }),

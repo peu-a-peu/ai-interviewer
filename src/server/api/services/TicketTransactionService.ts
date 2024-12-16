@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 class TicketTransactionService {
   static async recordTransaction(
-    email: string,
+    userId: string,
     ticketBalanceChange: number,
     type: "PURCHASE" | "CONSUMPTION",
     description: string
@@ -12,7 +12,7 @@ class TicketTransactionService {
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.email, email))
+      .where(eq(users.id, userId))
       .limit(1)
       .then((rows) => rows[0]);
 
@@ -21,7 +21,7 @@ class TicketTransactionService {
     }
 
     await db.insert(ticketTransactions).values({
-      userId: user.userId,
+      userId,
       ticketBalanceChange,
       type,
       description,

@@ -2,10 +2,9 @@ import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { TRPCReactProvider } from "@/trpc/react";
 import { getLocale, getMessages } from "next-intl/server";
 import Navbar from "./components/navigation/Navbar";
+import ClientContextProvider from "./ClientContextProvider";
 
 export const metadata: Metadata = {
   title: "AI Interviewer demo",
@@ -35,12 +34,10 @@ export default async function RootLayout({
         )}
       </head>
       <body className="main-gradient">
-        <TRPCReactProvider>
-          <NextIntlClientProvider messages={messages} locale={locale}>
-            <Navbar />
-            {children}
-          </NextIntlClientProvider>
-        </TRPCReactProvider>
+        <ClientContextProvider messages={messages} locale={locale}>
+          <Navbar />
+          {children}
+        </ClientContextProvider>
       </body>
     </html>
   );

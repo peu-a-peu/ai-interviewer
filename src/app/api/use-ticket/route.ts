@@ -6,18 +6,17 @@ import TicketTransactionService from "@/server/api/services/TicketTransactionSer
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
-    console.log(email);
+    const { userId } = await request.json();
 
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    if (!userId) {
+      return NextResponse.json({ error: "User Id is required" }, { status: 400 });
     }
 
     // Get current user data
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.email, email))
+      .where(eq(users.id, userId))
       .limit(1)
       .then((rows) => rows[0]);
 
@@ -39,12 +38,12 @@ export async function POST(request: NextRequest) {
         ticketCount: user.ticketCount - 1,
         updatedAt: new Date(),
       })
-      .where(eq(users.email, email))
+      .where(eq(users.id, userId))
       .returning({ updatedTicketCount: users.ticketCount });
 
     // Record the transaction
     await TicketTransactionService.recordTransaction(
-      email,
+      userId,
       -1,
       "CONSUMPTION",
       "Used 1 interview ticket"

@@ -6,12 +6,11 @@ import { loadTossPayments } from "@tosspayments/payment-sdk";
 import { ReactNode } from "react";
 import { getUserLocale } from "@/app/services/locale";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // email: string;
-  //   t: (key: string) => string;
 }
 
 interface PaymentTier {
@@ -23,12 +22,8 @@ interface PaymentTier {
 
 export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
   const [locale, setLocale] = useState("en");
-  const [email, setEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    setEmail(localStorage.getItem("userEmail"));
-  }, []);
-
+  const {data} = useSession()
+  const email = data?.user.email || ""
   useEffect(() => {
     async function fetchLocale() {
       const userLocale = await getUserLocale();
@@ -44,14 +39,13 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
     { price: 23000, originalPrice: 30000, interviews: 10, discount: "23" },
   ];
   const t = useTranslations();
-
   const handlePayment = async (tier: PaymentTier) => {
     try {
       if (locale === "ko") {
         const tossPayments = await loadTossPayments(
           process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? ""
         );
-        await tossPayments.requestPayment("카드", {
+        await tossPayments.requestPayment({
           amount: tier.price,
           customerEmail: email ?? undefined,
           orderId: Math.random().toString(36).slice(2),
@@ -90,7 +84,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
                   <div className="flex items-center justify-center">
                     <Ticket />
                   </div>
-                  <div className="flex items-start flex-col gap-1 ">
+                  <div className="flex leading-none items-start flex-col gap-1 ">
                     <p className="text-lg font-semibold flex items-center ">
                       {tier.price.toLocaleString()}
                     </p>
@@ -108,12 +102,12 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
                 </div>
                 <div className="flex justify-center ml-4">
                   <Button
-                    style={{ width: "90%" }}
+                    extraClasses="py-3 px-9"
                     onClick={() => handlePayment(tier)}
                   >
-                    <div className="flex items-center text-xs">
+                    <p className="text-xs whitespace-nowrap">
                       {t("Mock Interview")} {tier.interviews} {t("Times")}
-                    </div>
+                    </p>
                   </Button>
                 </div>
               </div>

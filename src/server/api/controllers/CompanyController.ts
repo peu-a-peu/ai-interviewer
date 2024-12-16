@@ -9,6 +9,10 @@ class CompanyController {
     static async getCompanyRoles(search:string){
         return await CompanyService.getAllRolesForCompany(search)
     }
+
+    static async getCompanyById(id:string){
+        return await CompanyService.getCompanyById(id)
+    }
 }
 
 export default CompanyController;

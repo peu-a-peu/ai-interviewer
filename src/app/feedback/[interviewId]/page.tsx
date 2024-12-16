@@ -20,7 +20,15 @@ export default async function FeedbackPage({
   if (!data) {
     return <h1>Nothing to show here</h1>;
   }
-  const summary: any = JSON.parse(data?.feedback || "{}") || {};
+  let summary: any;
+  summary = data?.feedback || ""
+  const jsonRegex = /\{.*\}/s;
+  const jsonString = summary.match(jsonRegex)[0];
+  try {
+    summary = JSON.parse(jsonString || "{}") || {}
+  } catch (err) {
+    summary = data?.feedback || ""
+  }
 
   return (
     <div>
@@ -35,12 +43,12 @@ export default async function FeedbackPage({
           {capitalize(data?.candidate_name || "")} <br />
           {t(`Mock interview results`)}
         </h1>
-        <p className="mt-3 text-center">
+        {typeof summary !== 'string' ? <p className="mt-3 text-center">
           {t(`The interview has ended`)}.{" "}
           {t(`Check out your strengths and points of improvement`)}
-        </p>
+        </p>: null}
         <div className="flex flex-col">
-          {Object.keys(summary).map((key) => {
+          {typeof summary === 'string' ? <p className="text-lg text-center">{summary}</p> : Object.keys(summary).map((key) => {
             const subKeys = Object.keys(summary[key]);
             return (
               <div className="mt-10">
