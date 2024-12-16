@@ -137,7 +137,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center">
-                <span className="px-2 bg-white text-gray-500">or</span>
+                <span className="px-2 bg-white text-gray-500">{t("or")}</span>
               </div>
             </div>
 
@@ -148,7 +148,7 @@ export default function LoginPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter Your Email"
+                placeholder={t("Enter Your Email")}
                 className="w-full px-3 py-3.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none  focus:border-gray-700"
               />
 
@@ -160,7 +160,7 @@ export default function LoginPage() {
                 {isLoadingEmail ? (
                  <Loader loading={isLoadingEmail}/>
                 ) : (
-                  "Sign in with Email"
+                  t("Sign in with Email")
                 )}
               </button>
             </form>
