@@ -239,6 +239,13 @@ export default function StartInterviewForm({ }) {
     }
     const request = indexedDB.open("fileStore", 1);
 
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("files")) {
+        db.createObjectStore("files", { keyPath: "id" });
+      }
+    };
+
     request.onsuccess = () => {
       const db = request.result;
       const transaction = db.transaction("files", "readwrite");
@@ -248,7 +255,6 @@ export default function StartInterviewForm({ }) {
 
       getRequest.onsuccess = () => {
         const file = getRequest.result;
-        console.log({file})
         if (file) {
           setFile(file.file)
           store.delete('user_uploaded_resume');  // Replace `1` with the actual file ID
