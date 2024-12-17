@@ -14,11 +14,11 @@ export async function POST(request: NextRequest, res: NextResponse) {
         const { mp3, isOver, images, question } = await InterviewController.getNextQuestion(interviewId, audioBlob);
         let audioBuffer;
         if (mp3) {
-            audioBuffer = Buffer.from(await (mp3 as any)?.arrayBuffer() as any);
+            audioBuffer =  Buffer.from((mp3 as Base64URLString),'base64');
         }
 
         const metadata = {
-            isOver: isOver? "Y" : "N",
+            isOver: isOver? "Y" : "",
             images,
             question
         }

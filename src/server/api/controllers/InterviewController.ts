@@ -43,15 +43,14 @@ class InterviewController {
             questions
         } as SystemPromptInput)
 
-        const imageMap:Record<string,string>={}
-        questions.forEach((item)=>{
-            imageMap[item.id] = item.images||""
+        const imageMap: Record<string, string> = {}
+        questions.forEach((item) => {
+            imageMap[item.id] = item.images || ""
         })
-        let lastAns:any = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
+        let lastAns: any = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
             const buffer = await audio.arrayBuffer();
             const base64str = Buffer.from(buffer).toString("base64");
-            console.log({ base64str })
             lastAns = [{ type: "input_audio", input_audio: { data: base64str, format: "mp3" } } as any];
         }
         const messageContext: ChatCompletionMessageParam[] = []
@@ -73,21 +72,21 @@ class InterviewController {
 
         let aiResponse = response.text
 
-        console.log({aiResponse})
+        console.log({ aiResponse })
         const isOver = aiResponse.includes("<<END_INTERVIEW>>")
         if (isOver) {
             await InterviewService.closeInterview(interviewId)
         }
         const regex = /<<([^<>]+)>>/;
         const match = aiResponse.match(regex);
-         let id = '', question=""
+        let id = '', question = ""
         if (match) {
             question = match?.[1] || ""
             if(question){
                 aiResponse = aiResponse.replace('<<','')
                 aiResponse = aiResponse.replace('>>','')
             }
-            const regex2 = /\(([^()]+)\)/;
+            const regex2 = /\{\{([^{}]+)\}\}/;
             const match2 = aiResponse.match(regex2)
             if (match2?.[1]) {
                 id = match2?.[1]?.trim()
@@ -98,17 +97,13 @@ class InterviewController {
         }
 
         await Promise.all([
-            InterviewService.addConversation(interviewId, response.id),
+            InterviewService.addConversation(interviewId, response.text),
+            lastConversationId && InterviewService.updateConversation(lastConversationId,response.id)
         ])
-        console.log({aiResponseClear: aiResponse})
-        let mp3;
-        if (aiResponse) {
-            mp3 = await this.audioService.convertTextToAudio(aiResponse)
-        }
-        return { mp3: response.base64audio, isOver, question, images: imageMap[id]||"" }
+        return { mp3: response.base64audio, isOver, question, images: imageMap[id] || "" }
     }
 
-     
+
     static async summarizeResume(resumeContent: string) {
         const prompt = `Extract the candidate's name, total years of experience, industries or domains worked in, and tools and technologies used from the following resume text. Present this information in a single, coherent paragraph of no more than 300 words, ensuring to exclude irrelevant details."
 Resume text: ${resumeContent}`

@@ -23,7 +23,7 @@ export default async function FeedbackPage({
   let summary: any;
   summary = data?.feedback || ""
   const jsonRegex = /\{.*\}/s;
-  const jsonString = summary.match(jsonRegex)[0];
+  const jsonString = summary.match(jsonRegex)?.[0];
   try {
     summary = JSON.parse(jsonString || "{}") || {}
   } catch (err) {
