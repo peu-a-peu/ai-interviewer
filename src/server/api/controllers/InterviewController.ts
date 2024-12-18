@@ -41,10 +41,11 @@ class InterviewController {
             language,
             questions
         } as SystemPromptInput)
+        console.log({prompt})
 
         const imageMap:Record<string,string>={}
-        questions.forEach((item)=>{
-            imageMap[item.id] = item.images||""
+        questions.forEach((item,index)=>{
+            imageMap[index+1] = item.images||""
         })
         let lastAns = "", lastConversationId = conversations[conversations.length - 1]?.conversation_id
         if (audio) {
@@ -79,16 +80,12 @@ class InterviewController {
          let id = '', question=""
         if (match) {
             question = match?.[1] || ""
-            if(question){
-                aiResponse = aiResponse.replace('<<','')
-                aiResponse = aiResponse.replace('>>','')
-            }
-            const regex2 = /\(([^()]+)\)/;
-            const match2 = aiResponse.match(regex2)
-            if (match2?.[1]) {
-                id = match2?.[1]?.trim()
-               aiResponse = aiResponse.replace(`(${id})`, '')
-               question = question.replace(`(${id})`, '')
+            if (question) {
+                id = question.split('{id:')?.[1] || ""
+                if (id) {
+                    id = id.replace('}', '')
+                    question = question.replace(`(${id})`, '')
+                }
             }
             aiResponse.trim()
         }
@@ -100,7 +97,7 @@ class InterviewController {
         console.log({aiResponseClear: aiResponse})
         let mp3;
         if (aiResponse) {
-            mp3 = await this.audioService.convertTextToAudio(aiResponse)
+            // mp3 = await this.audioService.convertTextToAudio(aiResponse)
         }
         return { mp3, isOver, question, images: imageMap[id]||"" }
     }
@@ -149,15 +146,17 @@ Resume text: ${resumeContent}`
         });
 
         let aiResponse: string = ''
+        const prompt = await evaluationPrompt({
+            experience,
+            interview_type,
+            resume_summary,
+            position,
+            language
+        } as SystemPromptInput) || ""
+        console.log({evaluationPrompt: prompt})
         if (messageContext.length) {
             aiResponse = await this.chatService.getAiResponse({
-                prompt: evaluationPrompt({
-                    experience,
-                    interview_type,
-                    resume_summary,
-                    position,
-                    language
-                } as SystemPromptInput),
+                prompt,
                 role: "system",
                 messageContext
 

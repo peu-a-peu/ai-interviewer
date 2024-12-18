@@ -17,7 +17,7 @@ export default function ClientContextProvider({
   locale,
 }: ClientContextProviderProps) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false} refetchWhenOffline={false}>
       <TRPCReactProvider>
         <NextIntlClientProvider messages={messages} locale={locale}>
           {children}
