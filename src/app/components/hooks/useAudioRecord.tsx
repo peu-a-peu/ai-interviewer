@@ -64,7 +64,6 @@ export const useRecordVoice = () => {
     harkEventsRef.current = harkEvents;
 
     harkEvents.on("speaking", () => {
-      console.log("User is speaking");
       silenceTimeout.current && clearTimeout(silenceTimeout.current);
       // Prevent starting recording if Hark is active
       if (
@@ -77,7 +76,6 @@ export const useRecordVoice = () => {
     });
 
     harkEvents.on("stopped_speaking", () => {
-      console.log("User stopped speaking");
       silenceTimeout.current = setTimeout(() => {
         stopMediaRecording();
       }, silenceDuration); // Stop recording after silence duration

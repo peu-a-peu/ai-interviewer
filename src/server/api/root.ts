@@ -6,6 +6,7 @@ import { authRouter } from "./routers/auth";
 import { ticketRouter } from "./routers/ticket";
 import { verificationRouter } from "./routers/verification";
 import { emailVerificationRouter } from "./routers/emailVerification";
+import { paymentRouter } from "./routers/payment";
 
 /**
  * This is the primary router for your server.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   ticket: ticketRouter,
   verification: verificationRouter,
   emailVerification: emailVerificationRouter,
+  payment: paymentRouter
 });
 
 // export type definition of API

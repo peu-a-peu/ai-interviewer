@@ -104,7 +104,6 @@ export default function ViewPage({
       const audio = new Audio(audioUrl);
       // Define the event listener
       const onEnded = async () => {
-        console.log("Audio playback has finished.");
         // Add any additional logic you want to execute when audio finishes
         if (!isOver) {
           startRecording();

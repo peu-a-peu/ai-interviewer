@@ -14,6 +14,7 @@ const createContext = async (req: NextRequest) => {
     headers: req.headers,
   });
 };
+export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({

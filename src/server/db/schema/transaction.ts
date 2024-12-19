@@ -19,5 +19,6 @@ export const TransactionDetails = pgTable("transactionLog", {
   paymentStatus: varchar("paymentStatus", { length: 50 }).notNull(),
   paymentAmount: varchar("paymentAmount", { length: 50 }).notNull(),
   data: jsonb("data"),
+  service: varchar("service",{length: 20}).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

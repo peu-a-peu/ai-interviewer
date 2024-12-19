@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
             paymentStatus: data.status,
             paymentAmount: data.totalAmount.toString(),
             data: JSON.stringify(data),
+            service:"tosspayments"
           });
 
           await db

@@ -313,7 +313,6 @@ export default function StartInterviewForm({ }) {
 
   function selectFile(e: any) {
     const file = e.target.files?.[0];
-    console.log(file)
     setFile(file);
   }
 
