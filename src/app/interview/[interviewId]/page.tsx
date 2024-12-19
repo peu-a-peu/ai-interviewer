@@ -92,6 +92,7 @@ export default function ViewPage({
 
       const metadata = JSON.parse(response.headers.get("metadata") || "{}")
       let { isOver, question, images="" } = metadata;
+      isOver = isOver==='Y'
       setQuestionData({ question, images })
       // Convert the response to a Blob
       const audioBlob = await response.blob();

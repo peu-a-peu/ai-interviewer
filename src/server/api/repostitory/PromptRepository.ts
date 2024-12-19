@@ -20,6 +20,13 @@ class PromptRepository {
     return (await query).map((item) => item.prompt);
 
   }
+
+
+  static getPromptById = async(id:string)=>{
+    return (await db.select({
+      prompt: prompt.prompt
+    }).from(prompt).where(eq(prompt.prompt_id, id)))?.[0]?.prompt
+  }
 }
 
 export default PromptRepository;

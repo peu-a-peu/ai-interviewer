@@ -33,12 +33,10 @@ export function languagePrompt(language: string) {
 }
 
 export function questionsPrompt(questions: QuestionOutput[]) {
-    let prompt="\n These are the questions that you have to ask the candidate."
-    questions.forEach(({question, id},index)=>{
-        prompt+=`\n ${index+1}.${question} {{${id}}}`
+    let prompt = "\n These are the questions that you have to ask the candidate."
+    questions.forEach(({ question}, index) => {
+        prompt += `\n ${index + 1}.${question}{id:${index+1}}`
     })
-    prompt+=`\n IMPORTANT (ALWAYS ADEHERE TO THIS RULE ):  Within your response wrap the question in special characters like this: << question {{id}} >>. For example: "<< How are you {{EFJKL}} >>".
-`
     return prompt;
 }
 export async function getSystemPrompt(promptVariables: SystemPromptInput): Promise<string> {
@@ -62,25 +60,8 @@ export async function getSystemPrompt(promptVariables: SystemPromptInput): Promi
 }
 
 
-export function evaluationPrompt(promptVariables: InterviewInput) {
-    let prompt = `You are an AI interviewer, you have taken the interview of a candidate and now you have to evaluate the candidate responses. You have to analyse the conversation which is passed as a context to you and 
-    reply with a json object like this
-{
-  "Strengths": {
-    "KeyAspect1": "1-2 line explanation.",
-    "KeyAspect2": "1-2 line explanation."
-  },
-  "Improvements": {
-    "KeyAspect1": "1-2 line explanation.",
-    "KeyAspect2": "1-2 line explanation."
-  }
-}
-  Adhere to these important rules: 
-  1. When referring to the candidate in your feedback, use "you" pronoun instead of the candidate's name.
-  2. Keep the aspect keys only upto 5.
-  3. ${languagePrompt(promptVariables.language)}
-  4. Do not include any text in your response apart from json. INCLUDE ONLY AND ONLY JSON IN YOUR RESPONSE.
-`
+export async function evaluationPrompt(promptVariables: InterviewInput) {
+    let prompt = await PromptService.getPromptById('FEEDBACK_PROMPT')
+    prompt += languagePrompt(promptVariables.language)
     return prompt
-
 }
