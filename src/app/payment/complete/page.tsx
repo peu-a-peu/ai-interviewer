@@ -10,10 +10,7 @@ export default function Page({
   const [payments, setPayments] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  console.log("searchParams", searchParams);
-  console.log("searchParams.orderId", searchParams.orderId);
-  console.log("payments", payments);
-  // console.log("payments.totalAmount", payments.totalAmount);
+
 
   useEffect(() => {
     const fetchPayments = async () => {

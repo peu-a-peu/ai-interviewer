@@ -7,6 +7,10 @@ import { ReactNode } from "react";
 import { getUserLocale } from "@/app/services/locale";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
+import { api } from "@/trpc/react";
+import { stripePromise } from "@/app/services/stripe";
+import { STRIPE_PRICE_IDS } from "@/common/constants/stripe";
+import OverlayLoader from "../ui/OverlayLoader";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -18,11 +22,13 @@ interface PaymentTier {
   price: number;
   originalPrice: number;
   interviews: number;
+  priceId?:string;
 }
 
 export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
   const [locale, setLocale] = useState("en");
   const {data} = useSession()
+  const [loading, setLoading] = useState(false)
   const email = data?.user.email || ""
   useEffect(() => {
     async function fetchLocale() {
@@ -32,19 +38,37 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
     fetchLocale().catch(console.error);
   }, []);
 
+  const createStripeSession = api.payment.createStripeSession.useMutation({
+    onSuccess:async (data)=>{
+      const stripe = await stripePromise;
+      if (stripe && data.sessionId) {
+        await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      }
+    }
+  })
+
   const paymentTiers: PaymentTier[] = [
     { price: 3000, originalPrice: 3000, interviews: 1, discount: "" },
     { price: 8000, originalPrice: 9000, interviews: 3, discount: "11" },
     { price: 15000, originalPrice: 18000, interviews: 6, discount: "17" },
     { price: 23000, originalPrice: 30000, interviews: 10, discount: "23" },
   ];
+
+  const paymentTiersUsd: PaymentTier[] = [
+    { price: 3, originalPrice: 3, interviews: 1, discount: "" },
+    { price: 8, originalPrice: 9, interviews: 3, discount: "11" },
+    { price: 15, originalPrice: 18, interviews: 6, discount: "17" },
+    { price: 23, originalPrice: 30, interviews: 10, discount: "23" },
+  ];
   const t = useTranslations();
-  const handlePayment = async (tier: PaymentTier) => {
+  const handlePayment = async (tier: PaymentTier, index?:number) => {
+    setLoading(true)
     try {
       if (locale === "ko") {
         const tossPayments = await loadTossPayments(
           process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? ""
         );
+        setLoading(true)
         await tossPayments.requestPayment({
           amount: tier.price,
           customerEmail: email ?? undefined,
@@ -54,18 +78,21 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
           failUrl: `${window.location.origin}/api/payments`,
           // _skipAuth: "FORCE_SUCCESS",
         });
+        setLoading(false)
       } else {
         // Implement Stripe payment logic here
-        console.log("stripe");
+          createStripeSession.mutate({priceId: STRIPE_PRICE_IDS[index!] as string})
       }
     } catch (error) {
       console.error("Payment initialization failed:", error);
+      setLoading(false)
     }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md mx-auto  ">
+      <div className="relative w-full max-w-md mx-auto">
+        <OverlayLoader loading={loading || createStripeSession.isPending} size="lg"/>
         <h2 className="text-2xl font-bold text-center mb-6">
           {t("Would you like to conduct a mock interview?")}
         </h2>
@@ -74,7 +101,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
         </p>
 
         <div className="space-y-4 ">
-          {paymentTiers.map((tier, index) => (
+          {(locale=='ko' ? paymentTiers : paymentTiersUsd).map((tier, index) => (
             <div
               key={index}
               className="border rounded-lg p-4 transition-colors"
@@ -102,8 +129,8 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
                 </div>
                 <div className="flex justify-center ml-4">
                   <Button
-                    extraClasses="py-3 px-9"
-                    onClick={() => handlePayment(tier)}
+                    extraClasses="py-3 px-9 cursor-pointer"
+                    onClick={() => handlePayment(tier, index)}
                   >
                     <p className="text-xs whitespace-nowrap">
                       {t("Mock Interview")} {tier.interviews} {t("Times")}

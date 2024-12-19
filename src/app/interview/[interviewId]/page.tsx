@@ -103,7 +103,6 @@ export default function ViewPage({
       const audio = new Audio(audioUrl);
       // Define the event listener
       const onEnded = async () => {
-        console.log("Audio playback has finished.");
         // Add any additional logic you want to execute when audio finishes
         if (!isOver) {
           startRecording();
@@ -123,7 +122,6 @@ export default function ViewPage({
       audio.play();
       // Play the audio
       const data = await response.json()
-      console.log({ PPPPPPPP: data })
       return () => {
         audio.removeEventListener("ended", onEnded);
         // Optionally revoke the object URL to free up resources
@@ -162,7 +160,6 @@ export default function ViewPage({
   let { question, images } = questionData
   const imageArray = (images.split(',') || []).filter((item) => !!item)
   const hasImages = imageArray.length != 0
-  console.log({ hasImages })
   return (
     <div>
       <section className="relative max-w-xl mx-auto body-height py-6 px-3 flex flex-col justify-between items-center">
