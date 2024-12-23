@@ -10,10 +10,6 @@ export async function GET(request: NextRequest) {
   const orderId = searchParams.get("orderId");
   const paymentKey = searchParams.get("paymentKey");
   const amount = searchParams.get("amount");
-  const encodedEmail = searchParams.get("email");
-  const email = decodeURIComponent(encodedEmail || "").replace(/\s/g, "+");
-  const interviews = searchParams.get("interviews");
-
   const secretKey = process.env.NEXT_PUBLIC_TOSS_SECRET_KEY;
   const url = "https://api.tosspayments.com/v1/payments/confirm";
   const basicToken = Buffer.from(`${secretKey}:`, "utf-8").toString("base64");
@@ -39,6 +35,7 @@ export async function GET(request: NextRequest) {
     cultureExpense: number;
     taxFreeAmount: number;
     taxExemptionAmount: number;
+    metadata:Record<string,string>
   }
   // const id = localStorage.getItem("userId");
   // console.log("payment ", id);
@@ -60,17 +57,15 @@ export async function GET(request: NextRequest) {
     const data = (await response.json()) as TossPaymentResponse;
 
     console.log("data", data);
-
+    const {userId, tickets} = data.metadata
     if (data.status === "DONE") {
       // Update ticket count
-      if (email && interviews) {
+      if (userId && tickets) {
         const user = await db
           .select()
           .from(users)
-          .where(eq(users.email, email))
-          .limit(1)
+          .where(eq(users.id, userId))
           .then((rows) => rows[0]);
-
         if (user) {
           // Store payment transaction
           await db.insert(TransactionDetails).values({
@@ -87,17 +82,17 @@ export async function GET(request: NextRequest) {
           await db
             .update(users)
             .set({
-              ticketCount: (user.ticketCount || 0) + Number(interviews),
+              ticketCount: (user.ticketCount || 0) + Number(tickets),
               updatedAt: new Date(),
             })
-            .where(eq(users.email, email));
+            .where(eq(users.id, userId));
 
           // Record the transaction
           await TicketTransactionService.recordTransaction(
-            email,
-            Number(interviews),
+            userId,
+            Number(tickets),
             "PURCHASE",
-            `Purchased ${interviews} interview tickets`
+            `Purchased ${tickets} interview tickets`
           );
         }
       }
@@ -109,6 +104,7 @@ export async function GET(request: NextRequest) {
       );
     }
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: "Payment confirmation failed" },
       { status: 400 }

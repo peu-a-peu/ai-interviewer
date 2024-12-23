@@ -30,6 +30,7 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
   const {data} = useSession()
   const [loading, setLoading] = useState(false)
   const email = data?.user.email || ""
+  const userId = data?.user.id || ""
   useEffect(() => {
     async function fetchLocale() {
       const userLocale = await getUserLocale();
@@ -74,9 +75,12 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
           customerEmail: email ?? undefined,
           orderId: Math.random().toString(36).slice(2),
           orderName: `Mock Interview ${tier.interviews}회`,
-          successUrl: `${window.location.origin}/api/payments?email=${email}&interviews=${tier.interviews}`,
+          successUrl: `${window.location.origin}/api/payments`,
           failUrl: `${window.location.origin}/api/payments`,
-          // _skipAuth: "FORCE_SUCCESS",
+          metadata:{
+            userId,
+            tickets: tier.interviews
+          }
         });
         setLoading(false)
       } else {
