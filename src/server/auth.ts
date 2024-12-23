@@ -44,8 +44,8 @@ export const sendVerificationRequest = async ({
       subject: `InterviewPrep에 대한 로그인 링크`,
       text: `다음 링크를 클릭하여 InterPrep에 로그인하십시오. ${url}`,
       html: `
-        <h1>인터뷰 준비를 위한 로그인 링크</h1>
-        <p>이메일 주소를 확인하려면 아래 링크를 클릭하세요:</p>
+        <h1>안녕하세요. Interview Prep입니다!</h1>
+        <p>아래 링크를 눌러 이메일 인증을 완료해주세요.</p>
         <a href="${url}">${url}</a>
         <p>이 링크는 24시간 후에 만료됩니다.</p>
       `,
