@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/payment/complete?orderId=${orderId}", request.url));
     } else {
       return NextResponse.redirect(
         new URL(`/payment/fail?orderId=${orderId}`, request.url)

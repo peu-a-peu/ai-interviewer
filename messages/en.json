@@ -44,6 +44,7 @@
   "Administrative Assistant": "Administrative Assistant",
   "Name is required": "Name is required",
   "Company is required": "Company is required",
+  "Experience is required": "Experience is required",
   "Experience should be non negative": "Experience should be non negative",
   "Too large value for experience": "Too large value for experience",
   "Select an interview type": "Select an interview type",

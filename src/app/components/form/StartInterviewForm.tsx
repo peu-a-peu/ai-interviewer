@@ -78,7 +78,7 @@ export default function StartInterviewForm({ }) {
     candidate_name: z.string().min(1, { message: t("Name is required") }),
     company_id: z.string().min(1, { message: t("Company is required") }),
     experience: z
-      .number()
+      .number({invalid_type_error: t("Experience is required")})
       .gt(-1, { message: t("Experience should be non negative") })
       .lt(100, { message: t("Too large value for experience") }),
     interview_type: z
@@ -174,11 +174,13 @@ export default function StartInterviewForm({ }) {
       // Skip validation if no tickets or no user email
       if (!isAuthenticated) {
         localStorage.setItem("agreed", "agreed")
-        handleLoginRedirect();
+        saveDataLocally();
+        router.push("/login");
         return;
       }
 
       if (!isAuthenticated || data?.user?.ticketCount === 0) {
+        saveDataLocally();
         setShowPaymentModal(true);
         return;
       }
@@ -190,7 +192,7 @@ export default function StartInterviewForm({ }) {
       setLoading(false);
     }
   }
-  const handleLoginRedirect = () => {
+  const saveDataLocally = () => {
     localStorage.setItem(
       "formData",
       JSON.stringify(formData)
@@ -219,7 +221,6 @@ export default function StartInterviewForm({ }) {
         console.error("Error opening IDB:");
       };
     }
-    router.push("/login");
   };
 
   useEffect(() => {

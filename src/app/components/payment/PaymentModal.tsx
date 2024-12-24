@@ -117,12 +117,12 @@ export default function PaymentModal({ isOpen, onClose }: PaymentModalProps) {
                   </div>
                   <div className="flex leading-none items-start flex-col gap-1 ">
                     <p className="text-lg font-semibold flex items-center ">
-                      {tier.price.toLocaleString()}
+                    {locale!='ko'? '$':null}{tier.price.toLocaleString()} {locale=='ko'? '원':null}
                     </p>
                     {tier.discount && (
                       <>
                         <p className="text-sm text-gray-500 line-through">
-                          {tier.originalPrice.toLocaleString()}
+                        {locale!='ko'? '$':null}{tier.originalPrice.toLocaleString()} {locale=='ko'? '원':null}
                         </p>
                         <p className="text-sm text-gray-500">
                           {tier.discount}%{t("discount")}

@@ -44,6 +44,7 @@
   "Administrative Assistant": "행정 보조원",
   "Name is required": "이름은 필수입니다.",
   "Company is required": "회사는 필수입니다.",
+  "Experience is required": "경험이 필요합니다.",
   "Experience should be non negative": "경험은 음수일 수 없습니다.",
   "Too large value for experience": "경험 값이 너무 큽니다.",
   "Select an interview type": "면접 유형을 선택하세요.",
